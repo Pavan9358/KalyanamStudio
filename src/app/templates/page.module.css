@@ -1,0 +1,142 @@
+.page {
+  min-height: 100vh;
+  background: var(--cream);
+}
+
+.header {
+  position: relative;
+  padding: 140px 24px 80px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.headerBg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #1A0A00 0%, #3D0000 60%, #5A0000 100%);
+}
+
+.headerBg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center bottom, rgba(212,175,55,0.1) 0%, transparent 70%);
+}
+
+.headerContent {
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.headerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 18px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 50px;
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+
+.headerTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 800;
+  color: var(--cream);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.headerTitleEm {
+  color: var(--gold);
+  font-style: italic;
+}
+
+.headerSubtitle {
+  font-size: 1rem;
+  color: rgba(255, 245, 225, 0.65);
+  line-height: 1.75;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.body {
+  padding: 56px 0 80px;
+}
+
+/* ===== FILTERS ===== */
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.filterBtn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  background: var(--white);
+  color: var(--text-mid);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.filterBtn:hover {
+  border-color: var(--gold);
+  color: var(--gold-dark);
+}
+
+.filterBtnActive {
+  background: var(--maroon);
+  color: var(--gold);
+  border-color: var(--maroon);
+  box-shadow: 0 4px 12px rgba(128, 0, 0, 0.25);
+}
+
+.resultCount {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+
+.bottomCta {
+  margin-top: 56px;
+}
+
+.ctaCard {
+  background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(128,0,0,0.06));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ctaEmoji {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.ctaCard h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--maroon);
+  margin-bottom: 6px;
+}
+
+.ctaCard p {
+  font-size: 0.87rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}

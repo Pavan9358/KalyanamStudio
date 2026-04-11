@@ -31,7 +31,38 @@ const DEFAULT_FORM = {
   couple_photo: null,
   gallery: [], // Added for multi-image support
   story_video_url: '',
-  music_url: '',
+};
+
+// Lightweight frontend base64 image compressor to solve Server Payload latencies
+const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height;
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress cleanly into JPEG (reduces 5MB PNGs to ~150KB)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedBase64);
+      };
+    };
+  });
 };
 
 function EventSection({ events, onChange }) {
@@ -210,35 +241,26 @@ export default function BuilderPage({ params }) {
     }
   };
 
-  const handlePhotoUpload = (e) => {
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm(f => ({ ...f, couple_photo: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    const compressed = await compressImage(file);
+    setForm(f => ({ ...f, couple_photo: compressed }));
   };
 
-  const handleIndividualPhotoUpload = (e, field) => {
+  const handleIndividualPhotoUpload = async (e, field) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm(f => ({ ...f, [field]: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    const compressed = await compressImage(file);
+    setForm(f => ({ ...f, [field]: compressed }));
   };
 
-  const handleGalleryUpload = (e) => {
+  const handleGalleryUpload = async (e) => {
     const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm(f => ({ ...f, gallery: [...(f.gallery || []), reader.result] }));
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of files) {
+      const compressed = await compressImage(file);
+      setForm(f => ({ ...f, gallery: [...(f.gallery || []), compressed] }));
+    }
   };
 
   const removeGalleryPhoto = (idx) => {

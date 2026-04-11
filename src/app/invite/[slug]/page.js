@@ -183,7 +183,7 @@ export default function PublicInvitePage({ params }) {
       }
 
       try {
-        const res = await fetch(`/api/invite/${slug}`);
+        const res = await fetch(`/api/invite/${slug}`, { cache: 'no-store' });
         if (res.ok) {
           const jsonRes = await res.json();
           if (jsonRes.found !== false && jsonRes.invitation) {

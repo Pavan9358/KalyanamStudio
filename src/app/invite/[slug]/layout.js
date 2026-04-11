@@ -1,5 +1,8 @@
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Generate dynamic metadata for social media sharing
 export async function generateMetadata({ params }) {
   // Await the destructured params to conform with Next.js 15+ specifications

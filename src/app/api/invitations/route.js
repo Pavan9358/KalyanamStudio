@@ -39,13 +39,13 @@ export async function POST(request) {
 
     const { data, error } = await supabase
       .from('invitations')
-      .insert({
+      .upsert({
         user_id: decoded.userId,
         template_id,
         slug,
         status: 'draft',
         data_json,
-      })
+      }, { onConflict: 'slug' })
       .select()
       .single();
 

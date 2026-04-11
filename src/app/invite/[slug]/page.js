@@ -240,24 +240,39 @@ export default function PublicInvitePage({ params }) {
     setPlaying(!playing);
   };
 
-  if (loading) {
-    return (
-      <div className={styles.loading}>
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}>🪷</motion.div>
-        <p>Loading your regal invitation...</p>
-      </div>
-    );
-  }
-
-  if (!data) return <div className={styles.notFound}>Invitation not found.</div>;
+  if (!loading && !data) return <div className={styles.notFound}>Invitation not found.</div>;
 
   return (
     <div className={`${styles.page} ${styles[theme]}`}>
       <div className={styles.patternLayer} />
-      <audio ref={audioRef} src={data.music_url || template.template_json.music_url} loop />
+      {data && <audio ref={audioRef} src={data.music_url || template.template_json.music_url} loop />}
+
+      {/* LUXURY LOADER */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div 
+            className={styles.loadingScreen}
+            exit={{ opacity: 0, filter: 'blur(10px)' }}
+            transition={{ duration: 0.8 }}
+            key="loader"
+          >
+            <div className={styles.loaderSpinnerWrapper}>
+              <div className={styles.loaderRing}></div>
+              <div className={styles.loaderRingInner}></div>
+              <img src="/ganesha_transparent.png?v=2" className={styles.loaderGanesha} />
+            </div>
+            <h2 className={styles.loaderText}>Preparing Your Invitation</h2>
+            <div className={styles.loaderBarWrapper}>
+              <div className={styles.loaderPulseBar}></div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ENTRANCE SCREEN (High Fidelity Redesign) */}
-      <AnimatePresence>
+      {!loading && data && (
+        <>
+          <AnimatePresence>
         {!opened && (
           <motion.div 
             className={styles.entrance}
@@ -382,7 +397,7 @@ export default function PublicInvitePage({ params }) {
               variants={{ hidden: { opacity: 0, y: 30, scale: 0.95 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 1.2, ease: 'easeOut' } } }}
             >
               {data.groom_name}
-              <span className={styles.entranceAmpersand} style={{fontSize: '4.5rem', margin: '0 1rem'}}>&</span>
+              <span className={styles.heroAmpersand}>&</span>
               {data.bride_name}
             </motion.h1>
             
@@ -590,6 +605,8 @@ export default function PublicInvitePage({ params }) {
           </footer>
 
         </main>
+      )}
+        </>
       )}
     </div>
   );

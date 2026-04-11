@@ -53,6 +53,102 @@
   background-size: 80px 140px;
 }
 
+/* PREMIUM PAGE LOADER */
+.loadingScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: var(--maroon);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loaderSpinnerWrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.loaderRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--gold);
+  border-bottom-color: rgba(255, 230, 183, 0.2);
+  animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+.loaderRingInner {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  border: 1px dashed var(--gold);
+  opacity: 0.5;
+  animation: spinReverse 3s linear infinite;
+}
+
+.loaderGanesha {
+  width: 50px;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 10px rgba(255, 230, 183, 0.4));
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.loaderText {
+  font-family: var(--font-playfair);
+  font-size: 1rem;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.loaderBarWrapper {
+  width: 200px;
+  height: 1px;
+  background: rgba(255, 230, 183, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.loaderPulseBar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 40%;
+  background: var(--gold);
+  animation: slideBar 1.5s ease-in-out infinite alternate;
+  box-shadow: 0 0 10px var(--gold);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spinReverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes slideBar {
+  0% { left: -10%; }
+  100% { left: 70%; }
+}
+
 /* ENTRANCE SCREEN (The Envelope substitute) */
 .entrance {
   position: fixed;
@@ -188,6 +284,15 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
+}
+
+.heroAmpersand {
+  font-family: var(--font-playfair);
+  font-size: 4.5rem;
+  font-style: italic;
+  color: var(--gold);
+  line-height: 0.8;
+  margin: 0 1rem;
 }
 
 .heroTagline {
@@ -581,8 +686,16 @@
 }
 
 @media (max-width: 768px) {
-  .heroNames { font-size: 3.5rem; }
-  .entranceNames { font-size: 2.8rem; }
+  .heroNames { 
+    font-size: 4rem; 
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .heroAmpersand {
+    font-size: 3rem;
+    margin: 0.5rem 0;
+  }
+  .entranceName { font-size: 3rem; }
   .invSection { padding: 4rem 1.2rem; }
   .countdownBox { width: 75px; height: 90px; }
   .countdownNum { font-size: 1.6rem; }

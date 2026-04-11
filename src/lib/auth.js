@@ -29,6 +29,5 @@ export function generateSlug(groomName, brideName) {
       .replace(/[^a-z0-9]/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
-  const randomStr = Math.random().toString(36).substring(2, 7);
-  return `${clean(groomName)}-weds-${clean(brideName)}-${randomStr}`;
+  return `${clean(groomName)}-weds-${clean(brideName)}`;
 }

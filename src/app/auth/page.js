@@ -74,7 +74,7 @@ function AuthForm() {
 
           <div className={styles.testimonial}>
             <p className={styles.testQuote}>
-              "KalyanamStudio made our wedding invitation process so smooth and beautiful. Our guests loved it!"
+              &quot;KalyanamStudio made our wedding invitation process so smooth and beautiful. Our guests loved it!&quot;
             </p>
             <div className={styles.testAuthor}>
               <div className={styles.testAvatar}>A</div>

@@ -1,0 +1,16 @@
+﻿package-lock.json
+package.json
+src/app/api/invitations/[id]/route.js
+src/app/api/invite/[slug]/route.js
+src/app/auth/page.js
+src/app/builder/[templateId]/page.js
+src/app/builder/[templateId]/page.module.css
+src/app/invite/[slug]/page.js
+src/app/invite/[slug]/page.module.css
+src/app/layout.js
+src/app/page.js
+src/app/templates/page.js
+src/components/Navbar.jsx
+src/components/TemplateCard.jsx
+src/lib/templates.js
+supabase_schema.sql

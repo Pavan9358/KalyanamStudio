@@ -10,6 +10,7 @@ export default function TemplateCard({ template, index = 0 }) {
     Modern: { bg: 'rgba(37,99,235,0.12)', color: '#1D4ED8' },
     Floral: { bg: 'rgba(46,125,50,0.12)', color: '#2E7D32' },
     Royal: { bg: 'rgba(212,175,55,0.15)', color: '#A88920' },
+    Premium: { bg: 'rgba(255,215,0,0.2)', color: '#B8860B' },
   };
   const cat = categoryColors[template.category] || categoryColors.Traditional;
 

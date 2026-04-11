@@ -4,7 +4,7 @@ import { verifyToken, getTokenFromRequest } from '@/lib/auth';
 
 // GET /api/invitations/[id]
 export async function GET(request, { params }) {
-  const { id } = params;
+  const { id } = await params;
 
   const { data, error } = await supabase
     .from('invitations')
@@ -27,7 +27,7 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = params;
+  const { id } = await params;
   const body = await request.json();
 
   const { data, error } = await supabase
@@ -55,7 +55,7 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = params;
+  const { id } = await params;
 
   const { error } = await supabase
     .from('invitations')

@@ -22,6 +22,7 @@ export default function Navbar() {
     const token = localStorage.getItem('ks_token');
     const userData = localStorage.getItem('ks_user');
     if (token && userData) {
+      // eslint-disable-next-line
       setUser(JSON.parse(userData));
     }
   }, [pathname]);

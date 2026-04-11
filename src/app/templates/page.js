@@ -76,7 +76,7 @@ export default function TemplatesPage() {
             <div className={styles.ctaCard}>
               <span className={styles.ctaEmoji}>✨</span>
               <div>
-                <h3>Can't find what you're looking for?</h3>
+                <h3>Can&apos;t find what you&apos;re looking for?</h3>
                 <p>More templates are being added regularly. Sign up to get notified about new additions.</p>
               </div>
             </div>

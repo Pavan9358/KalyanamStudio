@@ -4,11 +4,13 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { TEMPLATES } from '@/lib/templates';
+import { saveDraft } from '@/lib/localdb';
 import styles from './page.module.css';
 import {
   Plus, Trash2, Save, Eye, Share2,
   ChevronDown, ChevronUp, MapPin, Calendar,
-  Clock, User, Heart, MessageSquare, Sparkles
+  Clock, User, Heart, MessageSquare, Sparkles,
+  Image as ImageIcon, X
 } from 'lucide-react';
 
 const DEFAULT_FORM = {
@@ -24,7 +26,12 @@ const DEFAULT_FORM = {
   custom_message: '',
   dress_code: '',
   rsvp_contact: '',
+  groom_photo: null,
+  bride_photo: null,
   couple_photo: null,
+  gallery: [], // Added for multi-image support
+  story_video_url: '',
+  music_url: '',
 };
 
 function EventSection({ events, onChange }) {
@@ -113,131 +120,6 @@ function EventSection({ events, onChange }) {
   );
 }
 
-function LivePreview({ template, form }) {
-  const t = template;
-  if (!t) return null;
-
-  const formatDate = (d) => {
-    if (!d) return 'Date to be announced';
-    return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
-  };
-
-  const primaryEvent = form.events?.[0];
-
-  return (
-    <div
-      className={styles.preview}
-      style={{ background: t.colors?.bg || '#FFF5E1' }}
-    >
-      {/* Header band */}
-      <div
-        className={styles.previewHeader}
-        style={{ background: t.colors?.primary }}
-      >
-        <div className={styles.previewOrnTop}>✦ ✦ ✦</div>
-        <p className={styles.previewGreeting}>
-          {t.template_json?.subtitle || 'Together with their families'}
-        </p>
-        <h2
-          className={styles.previewNames}
-          style={{ color: t.colors?.secondary }}
-        >
-          {form.groom_name || 'Groom Name'}
-          <span className={styles.previewAmpersand}> &amp; </span>
-          {form.bride_name || 'Bride Name'}
-        </h2>
-        <p className={styles.previewInviteText}>
-          joyfully invite you to their wedding celebration
-        </p>
-        {form.couple_photo && (
-          <div className={styles.previewPhotoWrapper}>
-            <img src={form.couple_photo} alt="Couple" className={styles.previewPhoto} />
-          </div>
-        )}
-      </div>
-
-      {/* Events */}
-      <div className={styles.previewBody}>
-        <div className={styles.previewDivider}>
-          <span>♦</span>
-        </div>
-
-        {form.events?.filter(e => e.name || e.date).map((ev, i) => (
-          <div key={i} className={styles.previewEvent}>
-            <div
-              className={styles.previewEventDot}
-              style={{ background: t.colors?.primary }}
-            />
-            <div className={styles.previewEventInfo}>
-              <h4
-                className={styles.previewEventName}
-                style={{ color: t.colors?.primary }}
-              >
-                {ev.name || 'Event'}
-              </h4>
-              {ev.date && (
-                <p className={styles.previewEventDate}>
-                  📅 {formatDate(ev.date)}
-                </p>
-              )}
-              {ev.time && (
-                <p className={styles.previewEventMeta}>
-                  🕐 {ev.time} IST
-                </p>
-              )}
-              {ev.venue && (
-                <p className={styles.previewEventMeta}>
-                  📍 {ev.venue}
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
-
-        {form.address && (
-          <div className={styles.previewAddress}>
-            <MapPin size={14} style={{ flexShrink: 0, color: t.colors?.primary }} />
-            <span>{form.address}</span>
-          </div>
-        )}
-
-        {form.custom_message && (
-          <div
-            className={styles.previewMessage}
-            style={{ borderColor: t.colors?.secondary }}
-          >
-            <p>{form.custom_message}</p>
-          </div>
-        )}
-
-        {form.dress_code && (
-          <div className={styles.previewDressCode}>
-            👗 Dress Code: <strong>{form.dress_code}</strong>
-          </div>
-        )}
-
-        {(form.groom_parents || form.bride_parents) && (
-          <div className={styles.previewParents}>
-            <div className={styles.previewDivider}><span>♦</span></div>
-            <p className={styles.previewParentsLabel}>Blessed by</p>
-            {form.groom_parents && <p className={styles.previewParent}>{form.groom_parents}</p>}
-            {form.bride_parents && <p className={styles.previewParent}>{form.bride_parents}</p>}
-          </div>
-        )}
-
-        <div className={styles.previewFooter}>
-          <div className={styles.previewOrnBottom}>꧁ ✦ ꧂</div>
-          <p className={styles.previewFooterText}>
-            With blessings & love
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function BuilderPage({ params }) {
   const { templateId } = use(params);
   const router = useRouter();
@@ -287,7 +169,6 @@ export default function BuilderPage({ params }) {
     setSaving(true);
     const token = localStorage.getItem('ks_token');
 
-    // Try to save to API if Supabase is configured
     try {
       const res = await fetch('/api/invitations', {
         method: 'POST',
@@ -310,16 +191,20 @@ export default function BuilderPage({ params }) {
           router.push(`/invite/${data.invitation.slug}`);
         }
       } else {
-        // Fallback to localStorage demo mode
         const slug = `${form.groom_name || 'groom'}-weds-${form.bride_name || 'bride'}-demo`.toLowerCase().replace(/\s+/g, '-');
-        localStorage.setItem(`invite_${slug}`, JSON.stringify({ ...form, template_id: templateId, slug }));
-        showToast(status === 'published' ? 'Published (Demo mode — set up Supabase for full features)' : 'Saved to local draft!');
-        if (status === 'published') {
-          router.push(`/invite/${slug}`);
+        try {
+          await saveDraft(`invite_${slug}`, { ...form, template_id: templateId, slug });
+          showToast(status === 'published' ? 'Published (Demo mode — set up Supabase for full features)' : 'Saved offline to IndexedDB!');
+          if (status === 'published') {
+            router.push(`/invite/${slug}`);
+          }
+        } catch (e) {
+          showToast('Failed to save to local storage.', 'error');
+          console.error(e);
         }
       }
-    } catch {
-      showToast('Saved locally (offline mode)', 'success');
+    } catch (err) {
+      showToast('Network error, could not save.', 'error');
     } finally {
       setSaving(false);
     }
@@ -331,6 +216,44 @@ export default function BuilderPage({ params }) {
     const reader = new FileReader();
     reader.onloadend = () => {
       setForm(f => ({ ...f, couple_photo: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleIndividualPhotoUpload = (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForm(f => ({ ...f, [field]: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleGalleryUpload = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm(f => ({ ...f, gallery: [...(f.gallery || []), reader.result] }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeGalleryPhoto = (idx) => {
+    setForm(f => ({
+      ...f,
+      gallery: f.gallery.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const handleMusicUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForm(f => ({ ...f, music_url: reader.result }));
     };
     reader.readAsDataURL(file);
   };
@@ -349,10 +272,10 @@ export default function BuilderPage({ params }) {
 
   const sections = [
     { id: 'couple', label: 'Couple Details', icon: <Heart size={16} /> },
-    { id: 'events', label: 'Events', icon: <Calendar size={16} /> },
+    { id: 'events', label: 'Schedule', icon: <Calendar size={16} /> },
     { id: 'venue', label: 'Venue', icon: <MapPin size={16} /> },
-    { id: 'extra', label: 'Extra Details', icon: <MessageSquare size={16} /> },
-    { id: 'media', label: 'Photo', icon: <User size={16} /> },
+    { id: 'media', label: 'Photos & Music', icon: <ImageIcon size={16} /> },
+    { id: 'extra', label: 'RSVP & Final', icon: <MessageSquare size={16} /> },
   ];
 
   return (
@@ -360,17 +283,34 @@ export default function BuilderPage({ params }) {
       <Navbar />
 
       <div className={styles.builderLayout}>
-        {/* ===== LEFT: FORM PANEL ===== */}
+        {/* ===== CENTERED FORM PANEL ===== */}
         <div className={styles.formPanel}>
           <div className={styles.formPanelHeader}>
             <div className={styles.templateBadge}>
               <Sparkles size={13} />
-              {template.name}
+              {template.name} — Luxury Builder
             </div>
-            <h1 className={styles.formPanelTitle}>Customise Your Invite</h1>
+            <div className="flex-between">
+              <h1 className={styles.formPanelTitle}>Customise Your Invitation</h1>
+              <button 
+                className={styles.previewTabBtn} 
+                onClick={async () => {
+                  const slug = `demo-${templateId}`;
+                  try {
+                    await saveDraft(`invite_${slug}`, {...form, template_id: templateId});
+                    window.open(`/invite/${slug}`, '_blank');
+                  } catch (e) {
+                    alert('Could not save draft to IndexedDB.');
+                    console.error(e);
+                  }
+                }}
+              >
+                <Eye size={16} /> View Full Preview
+              </button>
+            </div>
           </div>
 
-          {/* Section nav */}
+          {/* New Prominent Tab Navigation */}
           <div className={styles.sectionNav}>
             {sections.map(s => (
               <button
@@ -385,205 +325,311 @@ export default function BuilderPage({ params }) {
           </div>
 
           <div className={styles.formBody}>
-            {/* COUPLE */}
-            {activeSection === 'couple' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className={styles.sectionTitle}>
-                  <Heart size={18} className={styles.sectionTitleIcon} />
-                  Couple Details
-                </div>
-                <div className="grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Groom's Full Name *</label>
-                    <input
-                      className="form-input"
-                      placeholder="e.g. Arjun Reddy"
-                      value={form.groom_name}
-                      onChange={e => setForm(f => ({ ...f, groom_name: e.target.value }))}
-                    />
+            <AnimatePresence mode="wait">
+              {activeSection === 'couple' && (
+                <motion.div 
+                  key="couple"
+                  initial={{ opacity: 0, x: -10 }} 
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                >
+                  <div className={styles.sectionTitle}>
+                    <Heart size={20} className={styles.sectionTitleIcon} />
+                    The Happy Couple
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Bride's Full Name *</label>
-                    <input
-                      className="form-input"
-                      placeholder="e.g. Priya Sharma"
-                      value={form.bride_name}
-                      onChange={e => setForm(f => ({ ...f, bride_name: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Groom's Parents</label>
-                  <input
-                    className="form-input"
-                    placeholder="e.g. Mr. & Mrs. Suresh Reddy"
-                    value={form.groom_parents}
-                    onChange={e => setForm(f => ({ ...f, groom_parents: e.target.value }))}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Bride's Parents</label>
-                  <input
-                    className="form-input"
-                    placeholder="e.g. Mr. & Mrs. Ramesh Sharma"
-                    value={form.bride_parents}
-                    onChange={e => setForm(f => ({ ...f, bride_parents: e.target.value }))}
-                  />
-                </div>
-              </motion.div>
-            )}
-
-            {/* EVENTS */}
-            {activeSection === 'events' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className={styles.sectionTitle}>
-                  <Calendar size={18} className={styles.sectionTitleIcon} />
-                  Events & Schedule
-                </div>
-                <EventSection
-                  events={form.events}
-                  onChange={events => setForm(f => ({ ...f, events }))}
-                />
-              </motion.div>
-            )}
-
-            {/* VENUE */}
-            {activeSection === 'venue' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className={styles.sectionTitle}>
-                  <MapPin size={18} className={styles.sectionTitleIcon} />
-                  Venue Details
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Full Address</label>
-                  <textarea
-                    className="form-input form-textarea"
-                    placeholder="Complete venue address"
-                    value={form.address}
-                    onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Google Maps Link</label>
-                  <input
-                    className="form-input"
-                    placeholder="https://maps.google.com/..."
-                    value={form.maps_link}
-                    onChange={e => setForm(f => ({ ...f, maps_link: e.target.value }))}
-                  />
-                </div>
-              </motion.div>
-            )}
-
-            {/* EXTRA */}
-            {activeSection === 'extra' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className={styles.sectionTitle}>
-                  <MessageSquare size={18} className={styles.sectionTitleIcon} />
-                  Extra Details
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Custom Message</label>
-                  <textarea
-                    className="form-input form-textarea"
-                    placeholder="A personal note to your guests..."
-                    value={form.custom_message}
-                    onChange={e => setForm(f => ({ ...f, custom_message: e.target.value }))}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Dress Code</label>
-                  <input
-                    className="form-input"
-                    placeholder="e.g. Traditional South Indian Attire"
-                    value={form.dress_code}
-                    onChange={e => setForm(f => ({ ...f, dress_code: e.target.value }))}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">RSVP Contact (Phone/Email)</label>
-                  <input
-                    className="form-input"
-                    placeholder="e.g. +91 98765 43210"
-                    value={form.rsvp_contact}
-                    onChange={e => setForm(f => ({ ...f, rsvp_contact: e.target.value }))}
-                  />
-                </div>
-              </motion.div>
-            )}
-
-            {/* MEDIA */}
-            {activeSection === 'media' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className={styles.sectionTitle}>
-                  <User size={18} className={styles.sectionTitleIcon} />
-                  Couple Photo
-                </div>
-                <div className={styles.photoUpload}>
-                  {form.couple_photo ? (
-                    <div className={styles.photoPreview}>
-                      <img src={form.couple_photo} alt="Couple" />
-                      <button
-                        className={styles.removePhotoBtn}
-                        onClick={() => setForm(f => ({ ...f, couple_photo: null }))}
-                      >
-                        <Trash2 size={14} /> Remove
-                      </button>
-                    </div>
-                  ) : (
-                    <label className={styles.photoUploadLabel}>
+                  <div className="grid-2">
+                    <div className="form-group">
+                      <label className="form-label">Groom&apos;s Full Name *</label>
                       <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className={styles.photoInput}
+                        className="form-input"
+                        placeholder="e.g. Arjun Reddy"
+                        value={form.groom_name}
+                        onChange={e => setForm(f => ({ ...f, groom_name: e.target.value }))}
                       />
-                      <div className={styles.uploadContent}>
-                        <div className={styles.uploadIcon}>📷</div>
-                        <p className={styles.uploadText}>Click to upload couple photo</p>
-                        <p className={styles.uploadHint}>JPG, PNG — max 5MB recommended</p>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Bride&apos;s Full Name *</label>
+                      <input
+                        className="form-input"
+                        placeholder="e.g. Priya Sharma"
+                        value={form.bride_name}
+                        onChange={e => setForm(f => ({ ...f, bride_name: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Groom&apos;s Parents</label>
+                    <input
+                      className="form-input"
+                      placeholder="e.g. Mr. & Mrs. Suresh Reddy"
+                      value={form.groom_parents}
+                      onChange={e => setForm(f => ({ ...f, groom_parents: e.target.value }))}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Bride&apos;s Parents</label>
+                    <input
+                      className="form-input"
+                      placeholder="e.g. Mr. & Mrs. Ramesh Sharma"
+                      value={form.bride_parents}
+                      onChange={e => setForm(f => ({ ...f, bride_parents: e.target.value }))}
+                    />
+                  </div>
+                </motion.div>
+              )}
+
+              {activeSection === 'events' && (
+                <motion.div 
+                  key="events"
+                  initial={{ opacity: 0, x: -10 }} 
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                >
+                  <div className={styles.sectionTitle}>
+                    <Calendar size={20} className={styles.sectionTitleIcon} />
+                    Sacred Muhurt & Schedule
+                  </div>
+                  <EventSection
+                    events={form.events}
+                    onChange={events => setForm(f => ({ ...f, events }))}
+                  />
+                </motion.div>
+              )}
+
+              {activeSection === 'venue' && (
+                <motion.div 
+                   key="venue"
+                   initial={{ opacity: 0, x: -10 }} 
+                   animate={{ opacity: 1, x: 0 }}
+                   exit={{ opacity: 0, x: 10 }}
+                >
+                  <div className={styles.sectionTitle}>
+                    <MapPin size={20} className={styles.sectionTitleIcon} />
+                    Venue Location
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Full Address</label>
+                    <textarea
+                      className="form-input form-textarea"
+                      placeholder="Complete venue address for your guests"
+                      value={form.address}
+                      onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Global Venue Map Link</label>
+                    <input
+                      className="form-input"
+                      placeholder="https://maps.google.com/..."
+                      value={form.maps_link}
+                      onChange={e => setForm(f => ({ ...f, maps_link: e.target.value }))}
+                    />
+                  </div>
+                </motion.div>
+              )}
+
+              {activeSection === 'media' && (
+                <motion.div 
+                  key="media"
+                  initial={{ opacity: 0, x: -10 }} 
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                >
+                  <div className={styles.sectionTitle}>
+                    <ImageIcon size={20} className={styles.sectionTitleIcon} />
+                    Photos & Story Music
+                  </div>
+                  
+                  {/* HERO PHOTO */}
+                  <div className={styles.heroUpload}>
+                     <div className={styles.heroPreview}>
+                        {form.couple_photo ? (
+                          <img src={form.couple_photo} alt="Couple" />
+                        ) : (
+                          <div style={{background: '#f0e0d0', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            📷
+                          </div>
+                        )}
+                     </div>
+                     <div className={styles.heroInfo}>
+                        <h4>Main Couple Photo</h4>
+                        <p>This appears prominently in the &quot;Our Story&quot; section.</p>
+                        <label className="btn btn-secondary" style={{display: 'inline-block', fontSize: '0.75rem', cursor: 'pointer'}}>
+                           Upload Photo
+                           <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                        </label>
+                        {form.couple_photo && (
+                          <button className="btn btn-link" onClick={() => setForm(f => ({...f, couple_photo: null}))} style={{color: '#C62828', marginLeft: 15, fontSize: '0.75rem'}}>
+                            Remove
+                          </button>
+                        )}
+                     </div>
+                  </div>
+
+                  {/* BRIDE & GROOM PHOTOS (INDIVIDUAL) */}
+                  <div className="grid-2" style={{ marginTop: '2rem' }}>
+                    <div className={styles.heroUpload} style={{ flexDirection: 'column', textAlign: 'center', padding: '1rem' }}>
+                      <div className={styles.heroPreview} style={{ width: '100px', height: '100px', borderRadius: '50%', margin: '0 auto 1rem' }}>
+                        {form.groom_photo ? (
+                          <img src={form.groom_photo} alt="Groom" style={{ borderRadius: '50%' }} />
+                        ) : (
+                          <div style={{background: '#f0e0d0', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%'}}>
+                            🤵
+                          </div>
+                        )}
                       </div>
-                    </label>
-                  )}
-                </div>
-              </motion.div>
-            )}
+                      <div className={styles.heroInfo} style={{ padding: 0 }}>
+                        <h4 style={{ fontSize: '0.9rem' }}>Groom Portrait</h4>
+                        <label className="btn btn-secondary" style={{display: 'inline-block', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.5rem'}}>
+                           Upload
+                           <input type="file" accept="image/*" className="hidden" onChange={e => handleIndividualPhotoUpload(e, 'groom_photo')} />
+                        </label>
+                        {form.groom_photo && (
+                          <div style={{marginTop: '0.5rem'}}>
+                            <button className="btn btn-link" onClick={() => setForm(f => ({...f, groom_photo: null}))} style={{color: '#C62828', fontSize: '0.75rem'}}>
+                              Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.heroUpload} style={{ flexDirection: 'column', textAlign: 'center', padding: '1rem' }}>
+                      <div className={styles.heroPreview} style={{ width: '100px', height: '100px', borderRadius: '50%', margin: '0 auto 1rem' }}>
+                        {form.bride_photo ? (
+                          <img src={form.bride_photo} alt="Bride" style={{ borderRadius: '50%' }} />
+                        ) : (
+                          <div style={{background: '#f0e0d0', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%'}}>
+                            👰
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles.heroInfo} style={{ padding: 0 }}>
+                        <h4 style={{ fontSize: '0.9rem' }}>Bride Portrait</h4>
+                        <label className="btn btn-secondary" style={{display: 'inline-block', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.5rem'}}>
+                           Upload
+                           <input type="file" accept="image/*" className="hidden" onChange={e => handleIndividualPhotoUpload(e, 'bride_photo')} />
+                        </label>
+                        {form.bride_photo && (
+                          <div style={{marginTop: '0.5rem'}}>
+                            <button className="btn btn-link" onClick={() => setForm(f => ({...f, bride_photo: null}))} style={{color: '#C62828', fontSize: '0.75rem'}}>
+                              Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* GALLERY SECTION */}
+                  <div className="form-group">
+                    <label className="form-label">Photo Gallary (Multi-upload)</label>
+                    <div className={styles.mediaGrid}>
+                       {form.gallery?.map((img, i) => (
+                         <div key={i} className={styles.previewBox}>
+                            <img src={img} alt={`Gallery ${i}`} />
+                            <button className={styles.removeImgBtn} onClick={() => removeGalleryPhoto(i)}>
+                               <X size={14} />
+                            </button>
+                         </div>
+                       ))}
+                       <label className={styles.photoUploadBox}>
+                          <input type="file" multiple accept="image/*" className="hidden" onChange={handleGalleryUpload} />
+                          <Plus size={18} className={styles.uploadIcon} />
+                          <span className={styles.uploadLabel}>Add Photo</span>
+                       </label>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ marginTop: '2rem' }}>
+                    <label className="form-label">Story Video URL (YouTube Embed)</label>
+                    <input
+                      className="form-input"
+                      placeholder="e.g. https://www.youtube.com/embed/..."
+                      value={form.story_video_url}
+                      onChange={e => setForm(f => ({ ...f, story_video_url: e.target.value }))}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Background Music (MP3 Upload)</label>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.5rem' }}>
+                      <label className="btn btn-secondary" style={{cursor: 'pointer'}}>
+                         Upload MP3
+                         <input type="file" accept="audio/mpeg, audio/mp3, audio/*" className="hidden" onChange={handleMusicUpload} />
+                      </label>
+                      {form.music_url && form.music_url.length > 500 && (
+                        <span style={{ fontSize: '0.8rem', color: 'var(--gold)' }}>✓ Custom Audio Attached</span>
+                      )}
+                      {!form.music_url || form.music_url.length <= 500 ? (
+                        <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Using Template Default Music</span>
+                      ) : null}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeSection === 'extra' && (
+                <motion.div 
+                  key="extra"
+                  initial={{ opacity: 0, x: -10 }} 
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                >
+                  <div className={styles.sectionTitle}>
+                    <MessageSquare size={20} className={styles.sectionTitleIcon} />
+                    RSVP & Final Touches
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Personal Message</label>
+                    <textarea
+                      className="form-input form-textarea"
+                      placeholder="A personal invitation message to your friends..."
+                      value={form.custom_message}
+                      onChange={e => setForm(f => ({ ...f, custom_message: e.target.value }))}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Dress Code / Theme</label>
+                    <input
+                      className="form-input"
+                      placeholder="e.g. Traditional Wedding Attire"
+                      value={form.dress_code}
+                      onChange={e => setForm(f => ({ ...f, dress_code: e.target.value }))}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">RSVP WhatsApp Number</label>
+                    <input
+                      className="form-input"
+                      placeholder="e.g. +91 93583 56885"
+                      value={form.rsvp_contact}
+                      onChange={e => setForm(f => ({ ...f, rsvp_contact: e.target.value }))}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* Action buttons */}
+          {/* Centered Actions */}
           <div className={styles.formActions}>
             <button
               className={`btn btn-secondary ${styles.actionBtn}`}
               onClick={() => saveInvitation('draft')}
               disabled={saving}
             >
-              <Save size={16} />
-              Save Draft
+              <Save size={18} />
+              Save Progress
             </button>
             <button
               className={`btn btn-primary ${styles.actionBtn}`}
               onClick={() => saveInvitation('published')}
               disabled={saving || !form.groom_name || !form.bride_name}
+              style={{ background: '#800000', borderColor: '#800000' }}
             >
-              <Share2 size={16} />
-              {saving ? 'Publishing...' : 'Publish & Share'}
+              <Share2 size={18} />
+              {saving ? 'Publishing...' : 'Finalize & Share'}
             </button>
-          </div>
-        </div>
-
-        {/* ===== RIGHT: LIVE PREVIEW ===== */}
-        <div className={styles.previewPanel}>
-          <div className={styles.previewHeader}>
-            <div className={styles.previewHeaderLabel}>
-              <Eye size={15} />
-              Live Preview
-            </div>
-            <div className={styles.previewDevice}>
-              <div className={styles.previewDeviceNotch} />
-              <div className={styles.previewDeviceScreen}>
-                <LivePreview template={template} form={form} />
-              </div>
-            </div>
           </div>
         </div>
       </div>

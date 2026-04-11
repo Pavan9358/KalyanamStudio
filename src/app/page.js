@@ -49,7 +49,7 @@ export default function HomePage() {
         >
           <motion.div variants={fadeUp} className={styles.heroBadge}>
             <Sparkles size={13} />
-            South India's First Self-Service Wedding Studio
+            South India&apos;s First Self-Service Wedding Studio
           </motion.div>
 
           <motion.h1 variants={fadeUp} className={styles.heroTitle}>
@@ -224,7 +224,7 @@ export default function HomePage() {
               <Star size={13} /> Pricing
             </div>
             <h2 className="text-maroon">Simple, Transparent Pricing</h2>
-            <p className={styles.sectionSubtitle}>Start free, upgrade when you're ready</p>
+            <p className={styles.sectionSubtitle}>Start free, upgrade when you&apos;re ready</p>
           </div>
 
           <div className={styles.pricingGrid}>

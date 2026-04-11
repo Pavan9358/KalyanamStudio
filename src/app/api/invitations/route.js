@@ -37,21 +37,51 @@ export async function POST(request) {
     const brideName = data_json?.bride_name || 'bride';
     const slug = generateSlug(groomName, brideName);
 
-    const { data, error } = await supabase
+    // 1. Check if an invitation with this exact slug already exists for this user
+    const { data: existing } = await supabase
       .from('invitations')
-      .upsert({
-        user_id: decoded.userId,
-        template_id,
-        slug,
-        status: 'draft',
-        data_json,
-      }, { onConflict: 'slug' })
-      .select()
+      .select('id')
+      .eq('slug', slug)
+      .eq('user_id', decoded.userId)
       .single();
 
-    if (error) throw error;
+    let resultData;
+    let resultError;
 
-    return NextResponse.json({ invitation: data });
+    if (existing) {
+      // 2. Perform UPDATE if it exists (no unique DB constraints required)
+      const { data, error } = await supabase
+        .from('invitations')
+        .update({
+          template_id,
+          status: 'draft',
+          data_json,
+        })
+        .eq('id', existing.id)
+        .select()
+        .single();
+      resultData = data;
+      resultError = error;
+    } else {
+      // 3. Perform standard INSERT if it doesn't exist
+      const { data, error } = await supabase
+        .from('invitations')
+        .insert({
+          user_id: decoded.userId,
+          template_id,
+          slug,
+          status: 'draft',
+          data_json,
+        })
+        .select()
+        .single();
+      resultData = data;
+      resultError = error;
+    }
+
+    if (resultError) throw resultError;
+
+    return NextResponse.json({ invitation: resultData });
   } catch (err) {
     console.error('Create invitation error:', err);
     return NextResponse.json({ error: 'Failed to create invitation' }, { status: 500 });

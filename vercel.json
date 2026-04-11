@@ -2,8 +2,5 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "framework": "nextjs",
-  "regions": ["bom1"],
-  "env": {
-    "JWT_SECRET": "@jwt_secret"
-  }
+  "regions": ["bom1"]
 }

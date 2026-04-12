@@ -42,6 +42,50 @@ export const TEMPLATES = [
         groom: 'Milind',
         bride: 'Avika'
       }
+    }
+  },
+  {
+    id: 'premium-south-indian',
+    name: 'Premium South Indian',
+    category: 'Premium',
+    description: 'A luxurious true-scroll experience blending cinematic full-screen temple overlays with glowing typographic treatments and floating light particles.',
+    preview_names: 'Vijay & Priya',
+    preview_sub: 'The Divine Beginning',
+    preview_date: 'April 21, 2026',
+    bg_gradient: 'linear-gradient(to bottom, #FDF8F0 0%, #D4AF37 100%)',
+    features: ['Glowing Parallax Elements', 'WhatsApp RSVP', 'Firefly Animations', 'Light & Dark Mode'],
+    is_premium: true,
+    colors: {
+      light: {
+        primary: '#8B1A1A',
+        secondary: '#D4AF37',
+        bg: '#FDF8F0',
+        card: '#FFFFFF',
+        text: '#3A2618',
+        muted: '#666666',
+      },
+      dark: {
+        primary: '#FFC107',
+        secondary: '#D32F2F',
+        bg: '#120000',
+        card: '#240000',
+        text: '#FFE0B2',
+        muted: '#BCAAA4',
+      }
+    },
+    template_json: {
+      title: 'With the blessings of God',
+      opening_text: '',
+      hero_ornament: 'venkateshwara',
+      story_label: 'Our Divine Journey',
+      video_url: '', 
+      music_url: '/background-music.mp3', 
+      events_label: 'Wedding Ceremonies',
+      rsvp_whatsapp: '911234567890',
+      couple_names: {
+        groom: 'Vijay',
+        bride: 'Priya'
+      }
     },
   }
 ];

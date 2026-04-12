@@ -37,7 +37,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${playfair.variable} ${poppins.variable} ${greatVibes.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${poppins.variable} ${greatVibes.variable}`} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

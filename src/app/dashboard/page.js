@@ -182,10 +182,10 @@ export default function DashboardPage() {
               <Sparkles size={18} />
               Templates
             </Link>
-            <div className={styles.navItem} style={{ opacity: 0.5, cursor: 'default' }}>
+            <Link href="/dashboard/analytics" className={styles.navItem}>
               <BarChart2 size={18} />
-              RSVP Analytics <span className={styles.comingSoon}>Soon</span>
-            </div>
+              RSVP Analytics
+            </Link>
           </nav>
 
           <div className={styles.sidebarCTA}>

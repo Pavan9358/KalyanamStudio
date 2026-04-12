@@ -1,0 +1,698 @@
+.page {
+  min-height: 100vh;
+  background-color: #FDF8F0; /* Soft creamy base */
+  color: #3A2618;
+  font-family: 'Inter', sans-serif; /* Clean body font */
+  overflow-x: hidden;
+  position: relative;
+  scroll-behavior: smooth;
+}
+
+/* Base Headings - Playfair/Cinzel elegant look */
+.page h1, .page h2, .page h3, .page h4 {
+  font-family: var(--font-playfair), 'Playfair Display', serif;
+  color: #8B1A1A; /* Deep Maroon */
+  margin: 0;
+}
+
+/* Floating Fireflies/Particles */
+.particleOverlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* --- HERO SECTION --- */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 2rem;
+  background-color: #1A0505;
+}
+
+.heroBg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  object-fit: contain; /* Changed from cover to keep the whole image visible */
+  object-position: center;
+  opacity: 1;
+  filter: none; /* Clear visibility */
+  z-index: 1;
+  transform: scale(1);
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(253, 248, 240, 0.4) 0%, rgba(253, 248, 240, 0.8) 100%);
+  z-index: 2;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 800px;
+}
+
+.heroTopLabel {
+  font-size: 1.2rem;
+  color: #8B1A1A;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.heroCoupleNames {
+  font-size: 4.5rem;
+  line-height: 1.1;
+  color: #8B1A1A; /* Maroon for contrast */
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+@media (max-width: 768px) {
+  .heroCoupleNames { font-size: 3.5rem; }
+}
+
+.heroScrollBtn {
+  margin-top: 3rem;
+  background: transparent;
+  color: #D4AF37;
+  border: 1px solid #D4AF37;
+  padding: 1rem 3rem;
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(5px);
+}
+
+.heroScrollBtn:hover {
+  background: #D4AF37;
+  color: #1A0505;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+}
+
+/* --- MUSIC TOGGLE --- */
+.musicBtn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #8B1A1A;
+  color: #FDF8F0;
+  border: 2px solid #D4AF37;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(139, 26, 26, 0.4);
+  transition: transform 0.3s;
+}
+.musicBtn:hover { transform: scale(1.1); }
+
+/* --- SECTION COMMON --- */
+.section {
+  padding: 8rem 2rem;
+  position: relative;
+  text-align: center;
+  background-color: #FDF8F0;
+}
+
+.sectionTitle {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.sectionSubtitle {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto 4rem;
+  line-height: 1.6;
+}
+
+.sectionLabel {
+  display: block;
+  font-size: 0.8rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #D4AF37;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+/* --- COUNTDOWN --- */
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.countdownBox {
+  background: #FFF;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 1.5rem;
+  border-radius: 8px;
+  min-width: 100px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  transition: all 0.3s ease;
+}
+
+.countdownNum {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #8B1A1A;
+  font-family: var(--font-playfair), serif;
+}
+
+.countdownLabel {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .countdown { gap: 0.8rem; }
+  .countdownBox { min-width: 70px; padding: 1rem 0.5rem; }
+  .countdownNum { font-size: 1.8rem; }
+  .countdownLabel { font-size: 0.6rem; letter-spacing: 1px; }
+}
+
+@media (max-width: 380px) {
+  .countdownBox { min-width: 65px; }
+  .countdownNum { font-size: 1.4rem; }
+}
+
+/* --- COUPLE SECTION --- */
+.coupleContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 3rem;
+}
+
+.coupleImageWrapper {
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  padding: 10px;
+  background: linear-gradient(135deg, #D4AF37, #8B1A1A, #D4AF37);
+  box-shadow: 0 15px 40px rgba(139, 26, 26, 0.15);
+  margin: 0 auto;
+}
+
+.coupleImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #FDF8F0;
+}
+
+.coupleText {
+  font-size: 2.5rem;
+  color: #8B1A1A;
+  margin-top: 2rem;
+}
+
+.coupleHeart {
+  color: #D4AF37;
+  margin: 0 15px;
+  font-size: 1.5rem;
+  display: inline-block;
+}
+
+/* --- EVENTS SECTION --- */
+.eventsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.eventCard {
+  background: #FFF;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.eventCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(139, 26, 26, 0.08);
+}
+
+/* Top accent bar for event card */
+.eventCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 6px;
+  background: linear-gradient(90deg, #D4AF37, #8B1A1A);
+}
+
+.eventName {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.eventDetailRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: #555;
+  font-size: 1.05rem;
+}
+
+.eventIcon {
+  color: #D4AF37;
+}
+
+.mapBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.5rem;
+  border: 1px solid #8B1A1A;
+  color: #8B1A1A;
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.mapBtn:hover {
+  background: #8B1A1A;
+  color: #FFF;
+}
+
+.calendarLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #D4AF37;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+
+.calendarLink:hover {
+  color: #8B1A1A;
+  transform: translateX(5px);
+}
+
+/* --- GALLERY (Scattered Polaroid) --- */
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.galleryItem {
+  background: #FFF;
+  padding: 1rem 1rem 3rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid #EEE;
+}
+
+.galleryImg {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- RSVP FORM --- */
+.rsvpCard {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 4rem 3rem;
+  border-radius: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  box-shadow: 0 20px 60px rgba(139, 26, 26, 0.08);
+  position: relative;
+}
+
+.rsvpForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  text-align: left;
+}
+
+.formInput {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-bottom: 1px solid #DDD;
+  background: #F9F9F9;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-bottom-color 0.3s;
+}
+
+.formInput:focus {
+  outline: none;
+  border-bottom-color: #8B1A1A;
+  background: #FDF8F0;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #3A2618;
+  font-weight: 500;
+}
+
+.radioLabel input {
+  accent-color: #8B1A1A;
+  transform: scale(1.2);
+}
+
+.rsvpSuccess {
+  padding: 4rem;
+  background: #FFF;
+  border-radius: 12px;
+  color: #8B1A1A;
+}
+
+/* --- SAVE THE DATE --- */
+.saveTheDate {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('/bg-couple-textured.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: scroll;
+  margin: 4rem 2rem;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+}
+
+.saveTheDateOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 5, 5, 0.5); /* Dark maroon overlay */
+}
+
+.saveTheDateContent {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  color: #FDF8F0;
+  padding: 2rem;
+}
+
+.saveTheDateTitle {
+  font-family: var(--font-playfair), serif;
+  font-size: 4rem;
+  color: #D4AF37;
+  margin: 1rem 0;
+  text-transform: capitalize;
+}
+
+.saveTheDateDivider {
+  width: 60px;
+  height: 2px;
+  background: #D4AF37;
+  margin: 1.5rem auto;
+}
+
+.saveTheDateText {
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.saveTheDateSub {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .saveTheDateTitle { font-size: 2.5rem; }
+  .saveTheDateText { font-size: 1.5rem; }
+  .saveTheDate { 
+    margin: 2rem 1rem; 
+    height: auto; 
+    min-height: 500px; 
+    padding: 3rem 1rem; 
+  }
+}
+
+/* --- PARALLAX MID-SECTION --- */
+.parallaxSection {
+  position: relative;
+  height: 50vh;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* CSS Parallax */
+  background-image: url('/bg-temple-light.jpg');
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.parallaxOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(139, 26, 26, 0.6); /* Maroon tint */
+}
+
+.parallaxContent {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #FDF8F0;
+  padding: 0 2rem;
+  max-width: 800px;
+}
+
+.parallaxSection .parallaxText {
+  font-family: var(--font-playfair), serif;
+  font-size: 2.5rem;
+  line-height: 1.4;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  color: #D4AF37;
+}
+@media (max-width: 768px) {
+  .parallaxText { font-size: 1.8rem; }
+}
+
+/* --- END/RSVP SECTION --- */
+.rsvpSection {
+  text-align: center;
+  padding: 6rem 2rem 10rem;
+  background-color: #FDF8F0;
+  position: relative;
+}
+
+.rsvpDecor {
+  display: block;
+  margin: 0 auto 3rem;
+  width: 150px;
+  opacity: 0.8;
+}
+
+.whatsappBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #25D366; /* WhatsApp Green */
+  color: #FFF;
+  padding: 1.2rem 3rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 50px;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+  transition: transform 0.3s ease;
+  border: none;
+  cursor: pointer;
+  margin-top: 2rem;
+}
+
+.whatsappBtn:hover {
+  transform: translateY(-3px);
+  background: #128C7E;
+}
+
+/* Or keeping the brand colored button */
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #8B1A1A;
+  color: #FDF8F0;
+  padding: 1.2rem 3rem;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-radius: 50px;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(139, 26, 26, 0.2);
+  transition: transform 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-3px);
+  background: #A52A2A;
+}
+
+/* --- LIVE STREAM SECTION --- */
+.liveStreamCard {
+  margin-top: 5rem;
+  background: rgba(139, 26, 26, 0.05);
+  border: 1px dashed #D4AF37;
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.liveIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #1A0505;
+  color: #FFF;
+  padding: 0.5rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin: 0 auto 1.5rem;
+  width: fit-content;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  background: #FF0000;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #FF0000;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.liveTitle {
+  font-size: 1.8rem;
+  color: #8B1A1A;
+  margin-bottom: 1rem;
+}
+
+.liveText {
+  color: #555;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+/* --- VIDEO SECTION --- */
+.videoContainer {
+  max-width: 900px;
+  margin: 4rem auto 0;
+  padding: 10px;
+  background: #D4AF37;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.videoWrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #000;
+}
+
+.videoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .liveTitle { font-size: 1.5rem; }
+  .videoContainer { margin-top: 2rem; }
+}

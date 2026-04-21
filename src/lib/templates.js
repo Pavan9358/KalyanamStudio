@@ -36,6 +36,9 @@ export const TEMPLATES = [
       story_label: 'Our Memories Bloom',
       video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
       music_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Placeholder
+      live_stream_url: 'https://youtube.com/live', // Showcase live stream
+      groom_family_photo: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1200&auto=format&fit=crop', // Placeholder family
+      bride_family_photo: 'https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?q=80&w=1200&auto=format&fit=crop', // Placeholder family
       events_label: 'Sacred Rituals',
       rsvp_whatsapp: '911234567890',
       couple_names: {

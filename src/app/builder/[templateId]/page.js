@@ -232,10 +232,15 @@ export default function BuilderPage({ params }) {
   const saveInvitation = async (status = 'draft') => {
     setSaving(true);
     const token = localStorage.getItem('ks_token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
 
     try {
-      const res = await fetch('/api/invitations', {
-        method: 'POST',
+      const url = editId ? `/api/invitations/${editId}` : '/api/invitations';
+      const method = editId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -243,22 +248,28 @@ export default function BuilderPage({ params }) {
         body: JSON.stringify({
           template_id: templateId,
           data_json: { ...form, template_id: templateId },
+          status: status
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
+        const finalSlug = data.invitation?.slug || `${form.groom_name}-weds-${form.bride_name}`.toLowerCase().replace(/\s+/g, '-');
+        
         showToast(status === 'published'
           ? 'Invitation published! Sharing link ready.'
-          : 'Draft saved!');
+          : 'Progress saved successfully.');
+          
         if (status === 'published') {
-          router.push(`/invite/${data.invitation.slug}`);
+          router.push(`/invite/${finalSlug}`);
         }
       } else {
+        const errData = await res.json().catch(() => ({}));
+        console.error('API Error:', errData);
         const slug = `${form.groom_name || 'groom'}-weds-${form.bride_name || 'bride'}-demo`.toLowerCase().replace(/\s+/g, '-');
         try {
           await saveDraft(`invite_${slug}`, { ...form, template_id: templateId, slug });
-          showToast(status === 'published' ? 'Published (Demo mode — set up Supabase for full features)' : 'Saved offline to IndexedDB!');
+          showToast(status === 'published' ? 'Published as Demo (Check console for API error)' : 'Saved offline to IndexedDB!');
           if (status === 'published') {
             router.push(`/invite/${slug}`);
           }

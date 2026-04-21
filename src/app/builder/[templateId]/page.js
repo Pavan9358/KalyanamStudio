@@ -38,8 +38,8 @@ const DEFAULT_FORM = {
   wedding_card_link: '',
 };
 
-// Lightweight frontend base64 image compressor to solve Server Payload latencies
-const compressImage = (file, maxDim = 800, quality = 0.6) => {
+// Ultra-lightweight frontend base64 image compressor to solve strict 1.5MB Server Payload latencies
+const compressImage = (file, maxDim = 500, quality = 0.4) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -69,7 +69,7 @@ const compressImage = (file, maxDim = 800, quality = 0.6) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Compress cleanly into JPEG (reduces large PNGs to ~80KB to bypass Serverless 4MB limits)
+        // Compress cleanly into lightweight JPEG (~20KB-40KB)
         const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
         resolve(compressedBase64);
       };
@@ -243,6 +243,21 @@ export default function BuilderPage({ params }) {
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
 
+    const payloadString = JSON.stringify({
+      template_id: templateId,
+      data_json: { ...form, template_id: templateId },
+      status: status
+    });
+
+    const payloadMB = payloadString.length / 1024 / 1024;
+    console.log(`Payload Size evaluated: ${payloadMB.toFixed(2)} MB`);
+
+    if (payloadMB > 1.5) {
+      showToast(`Payload is ${payloadMB.toFixed(1)}MB! Vercel limits at 1.5MB. Please clear your Photo Gallery completely and re-upload them to use the new compression engine.`, 'error');
+      setSaving(false);
+      return;
+    }
+
     try {
       const url = editId ? `/api/invitations/${editId}` : '/api/invitations';
       const method = editId ? 'PUT' : 'POST';
@@ -253,11 +268,7 @@ export default function BuilderPage({ params }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          template_id: templateId,
-          data_json: { ...form, template_id: templateId },
-          status: status
-        }),
+        body: payloadString,
       });
 
       if (res.ok) {
@@ -273,8 +284,8 @@ export default function BuilderPage({ params }) {
         }
       } else {
         const errData = await res.json().catch(() => ({}));
-        console.error('API Error:', errData);
-        showToast(errData.error || 'Failed to save to production database. Check your internet connection or photo sizes.', 'error');
+        console.error('API Error:', res.status, res.statusText, errData);
+        showToast(errData.error || `Save failed (HTTP ${res.status}). Payload too large or connection error.`, 'error');
       }
     } catch (err) {
       console.error('Network error during save:', err);

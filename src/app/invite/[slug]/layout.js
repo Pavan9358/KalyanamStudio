@@ -42,7 +42,7 @@ export async function generateMetadata({ params }) {
       const date = weddingEvent ? weddingEvent.date : 'the upcoming celebration';
 
       // Prefer couple portraits, fallback to gallery, fallback to Ganesha
-      const thumbnail = payload.groom_photo || payload.bride_photo || payload.gallery?.[0] || defaultThumbnail;
+      const thumbnail = payload.couple_photo || payload.groom_photo || payload.bride_photo || payload.gallery?.[0] || defaultThumbnail;
 
       const titleStr = `${groom} & ${bride} - You're Invited!`;
       const descStr = `Join us on ${date} as we step into our new beginning.`;

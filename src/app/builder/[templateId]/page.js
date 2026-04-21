@@ -239,21 +239,57 @@ export default function BuilderPage({ params }) {
 
   const saveInvitation = async (status = 'draft') => {
     setSaving(true);
+
+    // Auto-rescue mission: Squash any massive cached Base64 images recursively
+    const compressBase64 = (base64Str, maxDim = 600, quality = 0.5) => {
+      return new Promise((resolve) => {
+        if (!base64Str || typeof base64Str !== 'string' || !base64Str.startsWith('data:image')) return resolve(base64Str);
+        if (base64Str.length < 300000) return resolve(base64Str); // Ignore already small payloads (<300KB)
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > maxDim) { height = Math.round(height * (maxDim / width)); width = maxDim; }
+            } else {
+              if (height > maxDim) { width = Math.round(width * (maxDim / height)); height = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(base64Str);
+      });
+    };
+
+    let safeForm = { ...form };
+    safeForm.groom_photo = await compressBase64(safeForm.groom_photo);
+    safeForm.bride_photo = await compressBase64(safeForm.bride_photo);
+    safeForm.couple_photo = await compressBase64(safeForm.couple_photo);
+    safeForm.groom_family_photo = await compressBase64(safeForm.groom_family_photo);
+    safeForm.bride_family_photo = await compressBase64(safeForm.bride_family_photo);
+    if (safeForm.gallery && safeForm.gallery.length > 0) {
+      safeForm.gallery = await Promise.all(safeForm.gallery.map(img => compressBase64(img)));
+    }
+
     const token = localStorage.getItem('ks_token');
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
 
     const payloadString = JSON.stringify({
       template_id: templateId,
-      data_json: { ...form, template_id: templateId },
+      data_json: { ...safeForm, template_id: templateId },
       status: status
     });
 
     const payloadMB = payloadString.length / 1024 / 1024;
     console.log(`Payload Size evaluated: ${payloadMB.toFixed(2)} MB`);
 
-    if (payloadMB > 1.5) {
-      showToast(`Payload is ${payloadMB.toFixed(1)}MB! Vercel limits at 1.5MB. Please clear your Photo Gallery completely and re-upload them to use the new compression engine.`, 'error');
+    if (payloadMB > 4.3) {
+      showToast(`Payload is ${payloadMB.toFixed(1)}MB! Vercel's absolute maximum limit is 4.5MB. You must clear the massive photos currently in your gallery so the New compression engine can process small ones!`, 'error');
       setSaving(false);
       return;
     }

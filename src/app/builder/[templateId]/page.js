@@ -39,7 +39,7 @@ const DEFAULT_FORM = {
 };
 
 // Lightweight frontend base64 image compressor to solve Server Payload latencies
-const compressImage = (file, maxWidth = 800, quality = 0.6) => {
+const compressImage = (file, maxDim = 800, quality = 0.6) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -50,9 +50,16 @@ const compressImage = (file, maxWidth = 800, quality = 0.6) => {
         let width = img.width;
         let height = img.height;
 
-        if (width > maxWidth) {
-          height = (maxWidth / width) * height;
-          width = maxWidth;
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round(height * (maxDim / width));
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round(width * (maxDim / height));
+            height = maxDim;
+          }
         }
 
         const canvas = document.createElement('canvas');

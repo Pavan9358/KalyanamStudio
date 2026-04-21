@@ -266,20 +266,11 @@ export default function BuilderPage({ params }) {
       } else {
         const errData = await res.json().catch(() => ({}));
         console.error('API Error:', errData);
-        const slug = `${form.groom_name || 'groom'}-weds-${form.bride_name || 'bride'}-demo`.toLowerCase().replace(/\s+/g, '-');
-        try {
-          await saveDraft(`invite_${slug}`, { ...form, template_id: templateId, slug });
-          showToast(status === 'published' ? 'Published as Demo (Check console for API error)' : 'Saved offline to IndexedDB!');
-          if (status === 'published') {
-            router.push(`/invite/${slug}`);
-          }
-        } catch (e) {
-          showToast('Failed to save to local storage.', 'error');
-          console.error(e);
-        }
+        showToast(errData.error || 'Failed to save to production database. Check your internet connection or photo sizes.', 'error');
       }
     } catch (err) {
-      showToast('Network error, could not save.', 'error');
+      console.error('Network error during save:', err);
+      showToast('Network error: Could not reach the server.', 'error');
     } finally {
       setSaving(false);
     }

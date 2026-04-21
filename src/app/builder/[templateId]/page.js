@@ -29,6 +29,8 @@ const DEFAULT_FORM = {
   groom_photo: null,
   bride_photo: null,
   couple_photo: null,
+  groom_family_photo: null,
+  bride_family_photo: null,
   gallery: [], // Added for multi-image support
   story_video_url: '',
   live_stream_url: '',
@@ -569,6 +571,30 @@ export default function BuilderPage({ params }) {
                          </label>
                        </div>
                        <h4>Bride Portrait</h4>
+                    </div>
+                  </div>
+
+                  {/* FAMILY PORTRAITS ROW */}
+                  <div className={styles.portraitGrid} style={{ marginTop: '24px' }}>
+                    <div className={styles.portraitSide}>
+                       <div className={styles.avatarWrap}>
+                         {form.groom_family_photo ? <img src={form.groom_family_photo} alt="Groom Family" /> : <span className={styles.avatarLabel}>👨‍👩‍👦</span>}
+                         <label className={styles.avatarEdit}>
+                           <Edit3 size={12} />
+                           <input type="file" accept="image/*" className="hidden" onChange={e => handleIndividualPhotoUpload(e, 'groom_family_photo')} />
+                         </label>
+                       </div>
+                       <h4>Groom Family</h4>
+                    </div>
+                    <div className={styles.portraitSide}>
+                       <div className={styles.avatarWrap}>
+                         {form.bride_family_photo ? <img src={form.bride_family_photo} alt="Bride Family" /> : <span className={styles.avatarLabel}>👨‍👩‍👧</span>}
+                         <label className={styles.avatarEdit}>
+                           <Edit3 size={12} />
+                           <input type="file" accept="image/*" className="hidden" onChange={e => handleIndividualPhotoUpload(e, 'bride_family_photo')} />
+                         </label>
+                       </div>
+                       <h4>Bride Family</h4>
                     </div>
                   </div>
 

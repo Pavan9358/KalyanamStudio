@@ -320,6 +320,16 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
       {opened && (
         <main>
           <div className={styles.controls}>
+            {data?.live_stream_url && (
+              <button 
+                className={styles.liveControlBtn} 
+                onClick={() => window.open(data.live_stream_url, '_blank')}
+                title="Watch Live Ceremony"
+              >
+                <div className={styles.pulseDot} />
+                LIVE
+              </button>
+            )}
             <button className={styles.controlBtn} onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
               {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </button>
@@ -442,6 +452,47 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
               </motion.div>
             </div>
           </section>
+
+          {(data.groom_family_photo || data.bride_family_photo) && (
+            <section className={styles.invSection}>
+              <span className={styles.sectionLabel}>Our Roots</span>
+              <h2 className={styles.sectionTitle}>Meet The Families</h2>
+              
+              <div className={styles.coupleCardsGrid}>
+                {data.groom_family_photo && (
+                  <motion.div 
+                    className={styles.coupleCard}
+                    initial={{ opacity: 0, x: -60 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+                  >
+                    <div className={styles.coupleCardImgWrapper} style={{ width: '100%', height: 'auto', aspectRatio: '4/3' }}>
+                      <img src={data.groom_family_photo} alt="Groom Family" className={styles.coupleCardImg} style={{ objectFit: 'cover' }} />
+                    </div>
+                    <span className={styles.coupleCardRole}>Groom&apos;s Family</span>
+                    <h3 className={styles.coupleCardName} style={{ fontSize: '1.8rem' }}>Roots of {data.groom_name}</h3>
+                  </motion.div>
+                )}
+
+                {data.bride_family_photo && (
+                  <motion.div 
+                    className={styles.coupleCard}
+                    initial={{ opacity: 0, x: 60 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.8, type: "spring", bounce: 0.4, delay: 0.2 }}
+                  >
+                    <div className={styles.coupleCardImgWrapper} style={{ width: '100%', height: 'auto', aspectRatio: '4/3' }}>
+                      <img src={data.bride_family_photo} alt="Bride Family" className={styles.coupleCardImg} style={{ objectFit: 'cover' }} />
+                    </div>
+                    <span className={styles.coupleCardRole}>Bride&apos;s Family</span>
+                    <h3 className={styles.coupleCardName} style={{ fontSize: '1.8rem' }}>Roots of {data.bride_name}</h3>
+                  </motion.div>
+                )}
+              </div>
+            </section>
+          )}
 
           <section className={styles.invSection}>
             <motion.div initial={{opacity: 0}} whileInView={{opacity: 1}} viewport={{once: true}} transition={{duration: 1}}>

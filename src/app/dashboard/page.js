@@ -8,8 +8,9 @@ import { TEMPLATES } from '@/lib/templates';
 import styles from './page.module.css';
 import {
   Plus, Sparkles, Share2, Edit3, Trash2, Eye,
-  Copy, Check, Users, FileText, BarChart2, X, MessageCircle
+  Copy, Check, Users, FileText, BarChart2, X, MessageCircle, LogOut, Settings
 } from 'lucide-react';
+import MobileNav from '@/components/MobileNav';
 
 function RSVPModal({ invitation, onClose }) {
   const [rsvps, setRsvps] = useState([]);
@@ -158,7 +159,18 @@ export default function DashboardPage() {
 
   return (
     <main className={styles.page}>
-      <Navbar />
+      {/* Desktop Navbar */}
+      <div className={styles.desktopNavbar}><Navbar /></div>
+
+      {/* Mobile Top Header */}
+      <header className={styles.mobileHeader}>
+        <div className={styles.mobileLogo}>Kalyanam<span>Studio</span></div>
+        <div className={styles.mobileUser}>
+           <div className={styles.userAvatarSmall}>
+             {user?.name?.[0]?.toUpperCase() || 'U'}
+           </div>
+        </div>
+      </header>
 
       <div className={styles.layout}>
         {/* Sidebar */}
@@ -194,6 +206,13 @@ export default function DashboardPage() {
               New Invitation
             </Link>
           </div>
+
+          <div className={styles.sidebarFooter}>
+            <button className={styles.navItem} onClick={() => { localStorage.clear(); router.push('/auth'); }}>
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
         </aside>
 
         {/* Main Content */}
@@ -203,13 +222,13 @@ export default function DashboardPage() {
               <h1 className={styles.pageTitle}>{greeting} 👋</h1>
               <p className={styles.pageSubtitle}>
                 {invitations.length === 0
-                  ? "You haven't created any invitations yet."
-                  : `You have ${invitations.length} invitation${invitations.length !== 1 ? 's' : ''}.`}
+                  ? "Let's create something beautiful."
+                  : `You have ${invitations.length} active invitation${invitations.length !== 1 ? 's' : ''}.`}
               </p>
             </div>
-            <Link href="/templates" className="btn btn-primary">
+            <Link href="/templates" className={`${styles.headerActionBtn} btn btn-primary`}>
               <Plus size={16} />
-              New Invitation
+              <span>New Create</span>
             </Link>
           </div>
 
@@ -303,6 +322,14 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* FAB for Mobile */}
+      <Link href="/templates" className={styles.fab}>
+        <Plus size={24} />
+      </Link>
+
+      {/* Bottom Nav */}
+      <MobileNav />
 
       {/* RSVP Modal */}
       {viewingRSVPs && (

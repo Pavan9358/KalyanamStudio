@@ -484,6 +484,39 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
                 </motion.div>
               ))}
             </div>
+
+            {data?.live_stream_url && (
+              <motion.div 
+                className={styles.liveStreamCard}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                style={{
+                  marginTop: '3rem',
+                  padding: '2.5rem',
+                  background: 'rgba(255, 230, 183, 0.05)',
+                  border: '1px solid rgba(255, 230, 183, 0.2)',
+                  borderRadius: '16px',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#FFE6B7', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '1rem', letterSpacing: '2px' }}>
+                  <span style={{ width: '8px', height: '8px', background: '#FFE6B7', borderRadius: '50%', boxShadow: '0 0 10px #FFE6B7' }} />
+                  JOIN US VIRTUALLY
+                </div>
+                <h3 className={styles.sectionTitle} style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Ceremony Live Stream</h3>
+                <p style={{ opacity: 0.8, maxWidth: '500px', margin: '0 auto 2rem', fontSize: '0.9rem' }}>
+                  We wouldn't want you to miss our sacred union. Join our celebration live from anywhere in the world.
+                </p>
+                <button 
+                  onClick={() => window.open(data.live_stream_url, '_blank')}
+                  className={styles.openBtn}
+                  style={{ display: 'inline-flex', padding: '12px 32px', fontSize: '0.9rem' }}
+                >
+                  WATCH LIVE CEREMONY ✦
+                </button>
+              </motion.div>
+            )}
           </section>
 
           {data.gallery && data.gallery.length > 0 && (

@@ -487,22 +487,24 @@ export default function PremiumSouthIndianTemplate({ data, template, slug }) {
           </motion.div>
 
           {/* JOIN US LIVE FEATURE */}
-          <motion.div 
-            className={styles.liveStreamCard}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-          >
-            <div className={styles.liveIndicator}>
-              <span className={styles.liveDot} />
-              LIVE STREAMING
-            </div>
-            <h3 className={styles.liveTitle}>Join Our Celebration Remotely</h3>
-            <p className={styles.liveText}>For those who cannot join us in person, we'd love for you to be part of our divine union virtually.</p>
-            <a href="https://youtube.com/live" target="_blank" rel="noopener noreferrer" className={styles.primaryBtn}>
-              Join Us Live
-            </a>
-          </motion.div>
+          {data?.live_stream_url && (
+            <motion.div 
+              className={styles.liveStreamCard}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+            >
+              <div className={styles.liveIndicator}>
+                <span className={styles.liveDot} />
+                LIVE STREAMING
+              </div>
+              <h3 className={styles.liveTitle}>Join Our Celebration Remotely</h3>
+              <p className={styles.liveText}>For those who cannot join us in person, we'd love for you to be part of our divine union virtually.</p>
+              <a href={data.live_stream_url} target="_blank" rel="noopener noreferrer" className={styles.primaryBtn}>
+                Join Us Live
+              </a>
+            </motion.div>
+          )}
         </motion.div>
       </section>
 

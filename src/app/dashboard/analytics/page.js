@@ -23,7 +23,9 @@ import {
   Activity,
   FileText,
   Sparkles,
+  Share,
 } from 'lucide-react';
+import MobileNav from '@/components/MobileNav';
 
 // ─────────────────────────────────────────────────────────────
 // SVG DONUT CHART
@@ -205,6 +207,20 @@ function exportCSV(rsvps, invSlug) {
   a.download = `rsvp-${invSlug}-${Date.now()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function shareToWhatsApp(analytics, inv) {
+  if (!analytics) return;
+  const title = `📊 Wedding RSVP Summary: ${inv.data_json?.groom_name} & ${inv.data_json?.bride_name}`;
+  const summary = `
+Total Responses: ${analytics.total}
+Attending: ${analytics.attending} (${analytics.totalGuests} guests)
+Declined: ${analytics.declined}
+Response Rate: ${analytics.responseRate}%
+  `.trim();
+  
+  const text = encodeURIComponent(`${title}\n${summary}\n\nView details at: ${window.location.origin}/dashboard/analytics`);
+  window.open(`https://wa.me/?text=${text}`, '_blank');
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -406,13 +422,22 @@ export default function RSVPAnalyticsPage() {
 
               {/* Export CSV */}
               {analytics?.rsvps?.length > 0 && (
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => exportCSV(analytics.rsvps, selectedInv?.slug)}
-                >
-                  <Download size={15} />
-                  Export CSV
-                </button>
+                <div className={styles.headerActions}>
+                  <button
+                    className={`${styles.actionIconButton} btn btn-outline`}
+                    onClick={() => shareToWhatsApp(analytics, selectedInv)}
+                    title="Share to WhatsApp"
+                  >
+                    <Share size={15} />
+                  </button>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => exportCSV(analytics.rsvps, selectedInv?.slug)}
+                  >
+                    <Download size={15} />
+                    <span>Export CSV</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -653,6 +678,8 @@ export default function RSVPAnalyticsPage() {
           )}
         </div>
       </div>
+
+      <MobileNav />
     </main>
   );
 }

@@ -158,6 +158,28 @@
   flex-wrap: wrap;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionIconButton {
+  width: 36px;
+  height: 36px;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--maroon);
+  border-color: var(--border);
+}
+
+.actionIconButton:hover {
+  background: var(--cream-dark);
+}
+
 /* ===== LIVE INDICATOR ===== */
 .liveIndicator {
   display: flex;
@@ -280,6 +302,23 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .statsGrid {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 8px;
+    margin-right: -20px; /* Bleed effect */
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+  }
+  .statsGrid::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+  }
+  .statCard {
+    flex: 0 0 240px;
+  }
 }
 
 .statCard {
@@ -697,30 +736,51 @@
 @media (max-width: 768px) {
   .layout {
     grid-template-columns: 1fr;
+    padding-top: 20px; /* Reduced since Navbar coexists or is handled */
+    padding-bottom: 100px;
   }
   .sidebar {
-    position: static;
-    height: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 16px;
+    display: none;
   }
   .content {
-    padding: 24px 16px;
-  }
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    padding: 24px 20px;
   }
   .contentHeader {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
   .headerRight {
-    align-self: flex-start;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+  .tableHeader {
+    padding: 16px;
+  }
+  .tableWrap {
+    display: block; /* Ensure it stays a block for scroll */
+  }
+  /* On mobile, we might want to hide some table columns or use a card view */
+  .tdMessage, .tdDate, .tdNum {
+    display: none;
+  }
+  .table th:nth-child(1), .table th:nth-child(4), .table th:nth-child(5), .table th:nth-child(6) {
+    display: none;
   }
 }
 
 @media (max-width: 480px) {
-  .statsGrid {
-    grid-template-columns: 1fr;
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+  .statCard {
+    flex: 0 0 200px;
+    padding: 16px;
+  }
+  .statValue {
+    font-size: 1.6rem;
   }
 }

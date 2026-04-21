@@ -10,7 +10,7 @@ import {
   Plus, Trash2, Save, Eye, Share2,
   ChevronDown, ChevronUp, MapPin, Calendar,
   Clock, User, Heart, MessageSquare, Sparkles,
-  Image as ImageIcon, X
+  Image as ImageIcon, X, Video as VideoIcon, Music as MusicIcon, Radio, Edit3, Star
 } from 'lucide-react';
 
 const DEFAULT_FORM = {
@@ -31,6 +31,8 @@ const DEFAULT_FORM = {
   couple_photo: null,
   gallery: [], // Added for multi-image support
   story_video_url: '',
+  live_stream_url: '',
+  music_url: '',
 };
 
 // Lightweight frontend base64 image compressor to solve Server Payload latencies
@@ -159,6 +161,35 @@ export default function BuilderPage({ params }) {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [activeSection, setActiveSection] = useState('couple');
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
+  const sections = [
+    { id: 'couple', label: 'Couple Details', icon: <Heart size={16} /> },
+    { id: 'events', label: 'Schedule', icon: <Calendar size={16} /> },
+    { id: 'venue', label: 'Venue', icon: <MapPin size={16} /> },
+    { id: 'media', label: 'Photos & Music', icon: <ImageIcon size={16} /> },
+    { id: 'extra', label: 'RSVP & Final', icon: <MessageSquare size={16} /> },
+  ];
+
+  const handleNext = () => {
+    if (currentStepIndex < sections.length - 1) {
+      const nextIndex = currentStepIndex + 1;
+      setCurrentStepIndex(nextIndex);
+      setActiveSection(sections[nextIndex].id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStepIndex > 0) {
+      const prevIndex = currentStepIndex - 1;
+      setCurrentStepIndex(prevIndex);
+      setActiveSection(sections[prevIndex].id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const progress = ((currentStepIndex + 1) / sections.length) * 100;
 
   useEffect(() => {
     const token = localStorage.getItem('ks_token');
@@ -292,17 +323,24 @@ export default function BuilderPage({ params }) {
     );
   }
 
-  const sections = [
-    { id: 'couple', label: 'Couple Details', icon: <Heart size={16} /> },
-    { id: 'events', label: 'Schedule', icon: <Calendar size={16} /> },
-    { id: 'venue', label: 'Venue', icon: <MapPin size={16} /> },
-    { id: 'media', label: 'Photos & Music', icon: <ImageIcon size={16} /> },
-    { id: 'extra', label: 'RSVP & Final', icon: <MessageSquare size={16} /> },
-  ];
+
+
+  const currentSection = sections[currentStepIndex];
 
   return (
     <main className={styles.page}>
-      <Navbar />
+      {/* Desktop Navbar */}
+      <div className={styles.desktopNavbar}><Navbar /></div>
+
+      {/* Mobile Top Header */}
+      <header className={styles.mobileHeader}>
+        <div className={styles.mobileLogo}>Kalyanam<span>Studio</span></div>
+        <div className={styles.mobileUser}>
+           <div className={styles.userAvatarSmall}>
+             {template.name?.[0]?.toUpperCase() || 'K'}
+           </div>
+        </div>
+      </header>
 
       <div className={styles.builderLayout}>
         {/* ===== CENTERED FORM PANEL ===== */}
@@ -313,7 +351,7 @@ export default function BuilderPage({ params }) {
               {template.name} — Luxury Builder
             </div>
             <div className="flex-between">
-              <h1 className={styles.formPanelTitle}>Customise Your Invitation</h1>
+              <h1 className={styles.formPanelTitle}>Customise Invitation</h1>
               <button 
                 className={styles.previewTabBtn} 
                 onClick={async () => {
@@ -327,21 +365,40 @@ export default function BuilderPage({ params }) {
                   }
                 }}
               >
-                <Eye size={16} /> View Full Preview
+                <Eye size={16} /> <span>Preview</span>
               </button>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className={styles.progressContainer}>
+            <div className={styles.progressLabel}>
+              <span>Step {currentStepIndex + 1} of {sections.length}: {currentSection.label}</span>
+              <span>{Math.round(progress)}% Complete</span>
+            </div>
+            <div className={styles.progressBarBg}>
+               <motion.div 
+                 className={styles.progressBarFill}
+                 initial={{ width: 0 }}
+                 animate={{ width: `${progress}%` }}
+                 transition={{ duration: 0.5 }}
+               />
             </div>
           </div>
 
           {/* New Prominent Tab Navigation */}
           <div className={styles.sectionNav}>
-            {sections.map(s => (
+            {sections.map((s, idx) => (
               <button
                 key={s.id}
                 className={`${styles.sectionNavBtn} ${activeSection === s.id ? styles.sectionNavBtnActive : ''}`}
-                onClick={() => setActiveSection(s.id)}
+                onClick={() => {
+                   setActiveSection(s.id);
+                   setCurrentStepIndex(idx);
+                }}
               >
                 {s.icon}
-                {s.label}
+                <span>{s.label}</span>
               </button>
             ))}
           </div>
@@ -461,130 +518,131 @@ export default function BuilderPage({ params }) {
                     <ImageIcon size={20} className={styles.sectionTitleIcon} />
                     Photos & Story Music
                   </div>
-                  
-                  {/* HERO PHOTO */}
-                  <div className={styles.heroUpload}>
-                     <div className={styles.heroPreview}>
+
+                  {/* MAIN PHOTO CARD */}
+                  <div className={styles.mediaMainCard}>
+                    <div className={styles.cardHeader}>
+                      <Star size={14} className={styles.goldInt} />
+                      Main Hero Photo
+                    </div>
+                    <div className={styles.heroUploadWrap}>
+                      <div className={styles.mainPreview}>
                         {form.couple_photo ? (
                           <img src={form.couple_photo} alt="Couple" />
                         ) : (
-                          <div style={{background: '#f0e0d0', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                            📷
-                          </div>
-                        )}
-                     </div>
-                     <div className={styles.heroInfo}>
-                        <h4>Main Couple Photo</h4>
-                        <p>This appears prominently in the &quot;Our Story&quot; section.</p>
-                        <label className="btn btn-secondary" style={{display: 'inline-block', fontSize: '0.75rem', cursor: 'pointer'}}>
-                           Upload Photo
-                           <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
-                        </label>
-                        {form.couple_photo && (
-                          <button className="btn btn-link" onClick={() => setForm(f => ({...f, couple_photo: null}))} style={{color: '#C62828', marginLeft: 15, fontSize: '0.75rem'}}>
-                            Remove
-                          </button>
-                        )}
-                     </div>
-                  </div>
-
-                  {/* BRIDE & GROOM PHOTOS (INDIVIDUAL) */}
-                  <div className="grid-2" style={{ marginTop: '2rem' }}>
-                    <div className={styles.heroUpload} style={{ flexDirection: 'column', textAlign: 'center', padding: '1rem' }}>
-                      <div className={styles.heroPreview} style={{ width: '100px', height: '100px', borderRadius: '50%', margin: '0 auto 1rem' }}>
-                        {form.groom_photo ? (
-                          <img src={form.groom_photo} alt="Groom" style={{ borderRadius: '50%' }} />
-                        ) : (
-                          <div style={{background: '#f0e0d0', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%'}}>
-                            🤵
-                          </div>
+                          <div className={styles.placeholderIcon}>📸</div>
                         )}
                       </div>
-                      <div className={styles.heroInfo} style={{ padding: 0 }}>
-                        <h4 style={{ fontSize: '0.9rem' }}>Groom Portrait</h4>
-                        <label className="btn btn-secondary" style={{display: 'inline-block', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.5rem'}}>
-                           Upload
-                           <input type="file" accept="image/*" className="hidden" onChange={e => handleIndividualPhotoUpload(e, 'groom_photo')} />
-                        </label>
-                        {form.groom_photo && (
-                          <div style={{marginTop: '0.5rem'}}>
-                            <button className="btn btn-link" onClick={() => setForm(f => ({...f, groom_photo: null}))} style={{color: '#C62828', fontSize: '0.75rem'}}>
-                              Remove
-                            </button>
-                          </div>
-                        )}
+                      <div className={styles.heroContent}>
+                         <p>This is the first photo guests see. Use a high-quality portrait.</p>
+                         <label className={styles.uploadBtnPremium}>
+                           <Plus size={16} /> Upload Photo
+                           <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                         </label>
+                         {form.couple_photo && (
+                           <button className={styles.removeLink} onClick={() => setForm(f => ({...f, couple_photo: null}))}>
+                             Remove
+                           </button>
+                         )}
                       </div>
                     </div>
+                  </div>
 
-                    <div className={styles.heroUpload} style={{ flexDirection: 'column', textAlign: 'center', padding: '1rem' }}>
-                      <div className={styles.heroPreview} style={{ width: '100px', height: '100px', borderRadius: '50%', margin: '0 auto 1rem' }}>
-                        {form.bride_photo ? (
-                          <img src={form.bride_photo} alt="Bride" style={{ borderRadius: '50%' }} />
-                        ) : (
-                          <div style={{background: '#f0e0d0', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%'}}>
-                            👰
-                          </div>
-                        )}
-                      </div>
-                      <div className={styles.heroInfo} style={{ padding: 0 }}>
-                        <h4 style={{ fontSize: '0.9rem' }}>Bride Portrait</h4>
-                        <label className="btn btn-secondary" style={{display: 'inline-block', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.5rem'}}>
-                           Upload
+                  {/* PORTRAITS ROW */}
+                  <div className={styles.portraitGrid}>
+                    <div className={styles.portraitSide}>
+                       <div className={styles.avatarWrap}>
+                         {form.groom_photo ? <img src={form.groom_photo} alt="Groom" /> : <span className={styles.avatarLabel}>🤵</span>}
+                         <label className={styles.avatarEdit}>
+                           <Edit3 size={12} />
+                           <input type="file" accept="image/*" className="hidden" onChange={e => handleIndividualPhotoUpload(e, 'groom_photo')} />
+                         </label>
+                       </div>
+                       <h4>Groom Portrait</h4>
+                    </div>
+                    <div className={styles.portraitSide}>
+                       <div className={styles.avatarWrap}>
+                         {form.bride_photo ? <img src={form.bride_photo} alt="Bride" /> : <span className={styles.avatarLabel}>👰</span>}
+                         <label className={styles.avatarEdit}>
+                           <Edit3 size={12} />
                            <input type="file" accept="image/*" className="hidden" onChange={e => handleIndividualPhotoUpload(e, 'bride_photo')} />
-                        </label>
-                        {form.bride_photo && (
-                          <div style={{marginTop: '0.5rem'}}>
-                            <button className="btn btn-link" onClick={() => setForm(f => ({...f, bride_photo: null}))} style={{color: '#C62828', fontSize: '0.75rem'}}>
-                              Remove
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                         </label>
+                       </div>
+                       <h4>Bride Portrait</h4>
+                    </div>
+                  </div>
+
+                  {/* LIVE LINK SECTION */}
+                  <div className={styles.mediaMainCard} style={{ marginTop: '24px' }}>
+                    <div className={styles.cardHeader}>
+                      <Radio size={14} className={styles.liveInt} />
+                      Virtual Celebration
+                    </div>
+                    <div className="form-group" style={{ padding: '0 16px 16px' }}>
+                      <label className="form-label">Live Ceremony Link (YouTube/Zoom)</label>
+                      <input
+                        className="form-input"
+                        placeholder="https://www.youtube.com/live/..."
+                        value={form.live_stream_url}
+                        onChange={e => setForm(f => ({ ...f, live_stream_url: e.target.value }))}
+                      />
+                      <p className={styles.inputHint}>This link will allow remote guests to join your celebration live.</p>
                     </div>
                   </div>
 
                   {/* GALLERY SECTION */}
-                  <div className="form-group">
-                    <label className="form-label">Photo Gallary (Multi-upload)</label>
-                    <div className={styles.mediaGrid}>
-                       {form.gallery?.map((img, i) => (
-                         <div key={i} className={styles.previewBox}>
-                            <img src={img} alt={`Gallery ${i}`} />
-                            <button className={styles.removeImgBtn} onClick={() => removeGalleryPhoto(i)}>
-                               <X size={14} />
-                            </button>
-                         </div>
-                       ))}
-                       <label className={styles.photoUploadBox}>
-                          <input type="file" multiple accept="image/*" className="hidden" onChange={handleGalleryUpload} />
-                          <Plus size={18} className={styles.uploadIcon} />
-                          <span className={styles.uploadLabel}>Add Photo</span>
-                       </label>
+                  <div className={styles.mediaMainCard} style={{ marginTop: '24px' }}>
+                    <div className={styles.cardHeader}>
+                      <ImageIcon size={14} />
+                      Photo Gallery
+                    </div>
+                    <div className={styles.galleryWrap}>
+                       <div className={styles.mediaGrid}>
+                          {form.gallery?.map((img, i) => (
+                            <div key={i} className={styles.previewBox}>
+                               <img src={img} alt={`Gallery ${i}`} />
+                               <button className={styles.removeImgBtn} onClick={() => removeGalleryPhoto(i)}>
+                                  <X size={14} />
+                               </button>
+                            </div>
+                          ))}
+                          <label className={styles.photoUploadBoxCompact}>
+                             <input type="file" multiple accept="image/*" className="hidden" onChange={handleGalleryUpload} />
+                             <Plus size={18} />
+                             <span>Add</span>
+                          </label>
+                       </div>
                     </div>
                   </div>
 
-                  <div className="form-group" style={{ marginTop: '2rem' }}>
-                    <label className="form-label">Story Video URL (YouTube Embed)</label>
-                    <input
-                      className="form-input"
-                      placeholder="e.g. https://www.youtube.com/embed/..."
-                      value={form.story_video_url}
-                      onChange={e => setForm(f => ({ ...f, story_video_url: e.target.value }))}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Background Music (MP3 Upload)</label>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.5rem' }}>
-                      <label className="btn btn-secondary" style={{cursor: 'pointer'}}>
-                         Upload MP3
-                         <input type="file" accept="audio/mpeg, audio/mp3, audio/*" className="hidden" onChange={handleMusicUpload} />
-                      </label>
-                      {form.music_url && form.music_url.length > 500 && (
-                        <span style={{ fontSize: '0.8rem', color: 'var(--gold)' }}>✓ Custom Audio Attached</span>
-                      )}
-                      {!form.music_url || form.music_url.length <= 500 ? (
-                        <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Using Template Default Music</span>
-                      ) : null}
+                  {/* VIDEO & MUSIC */}
+                  <div className="grid-2" style={{ marginTop: '24px', gap: '16px' }}>
+                    <div className={styles.featureInputCard}>
+                      <div className={styles.featureTitle}>
+                        <VideoIcon size={16} /> Story Video
+                      </div>
+                      <input
+                        className="form-input"
+                        placeholder="YouTube URL"
+                        value={form.story_video_url}
+                        onChange={e => setForm(f => ({ ...f, story_video_url: e.target.value }))}
+                      />
+                    </div>
+                    <div className={styles.featureInputCard}>
+                      <div className={styles.featureTitle}>
+                        <MusicIcon size={16} /> Background Music
+                      </div>
+                      <div className={styles.musicRow}>
+                        <label className={styles.uploadBtnSm}>
+                           {form.music_url && form.music_url.length > 500 ? 'Change MP3' : 'Upload MP3'}
+                           <input type="file" accept="audio/*" className="hidden" onChange={handleMusicUpload} />
+                        </label>
+                        {form.music_url && form.music_url.length > 500 ? (
+                          <span className={styles.musicStatus}>✓ Custom</span>
+                        ) : (
+                          <span className={styles.musicStatusDefault}>Default Music</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -635,22 +693,35 @@ export default function BuilderPage({ params }) {
 
           {/* Centered Actions */}
           <div className={styles.formActions}>
+            <div className={styles.wizardNav}>
+               {currentStepIndex > 0 && (
+                 <button className={styles.wizardBtnBack} onClick={handleBack}>
+                   Back
+                 </button>
+               )}
+               {currentStepIndex < sections.length - 1 ? (
+                 <button className={styles.wizardBtnNext} onClick={handleNext}>
+                   Next Step
+                 </button>
+               ) : (
+                 <button
+                   className={`btn btn-primary ${styles.actionBtn} ${styles.publishBtn}`}
+                   onClick={() => saveInvitation('published')}
+                   disabled={saving || !form.groom_name || !form.bride_name}
+                 >
+                   <Share2 size={18} />
+                   {saving ? 'Publishing...' : 'Finalize & Share'}
+                 </button>
+               )}
+            </div>
+            
             <button
-              className={`btn btn-secondary ${styles.actionBtn}`}
+              className={`btn btn-secondary ${styles.actionBtn} ${styles.saveDraftBtn}`}
               onClick={() => saveInvitation('draft')}
               disabled={saving}
             >
               <Save size={18} />
-              Save Progress
-            </button>
-            <button
-              className={`btn btn-primary ${styles.actionBtn}`}
-              onClick={() => saveInvitation('published')}
-              disabled={saving || !form.groom_name || !form.bride_name}
-              style={{ background: '#800000', borderColor: '#800000' }}
-            >
-              <Share2 size={18} />
-              {saving ? 'Publishing...' : 'Finalize & Share'}
+              <span>Save Progress</span>
             </button>
           </div>
         </div>

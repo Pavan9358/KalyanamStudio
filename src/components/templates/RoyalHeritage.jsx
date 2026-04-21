@@ -393,6 +393,36 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
           </motion.header>
 
           <section className={styles.invSection}>
+            <motion.div 
+              initial={{opacity: 0, y: 50, scale: 0.95}} 
+              whileInView={{opacity: 1, y: 0, scale: 1}} 
+              viewport={{once: true}}
+              transition={{ duration: 1, ease: 'easeOut' }}
+              className={styles.stdCard}
+            >
+               <span className={styles.stdLabel}>Mark Your Calendars</span>
+               <h2 className={styles.stdTitle}>Save The Date</h2>
+               {(() => {
+                 const mainEventDate = data.events?.[0]?.date || '2026-02-22';
+                 const dateObj = new Date(mainEventDate);
+                 const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                 const day = String(dateObj.getDate()).padStart(2, '0');
+                 const year = dateObj.getFullYear();
+                 return (
+                   <div className={styles.stdDateBox}>
+                      <div className={styles.stdMonth}>{month}</div>
+                      <div className={styles.stdDivider} />
+                      <div className={styles.stdDay}>{day}</div>
+                      <div className={styles.stdDivider} />
+                      <div className={styles.stdYear}>{year}</div>
+                   </div>
+                 );
+               })()}
+               <p className={styles.stdLocation}>{data.address || "Royal Palace Grounds"}</p>
+            </motion.div>
+          </section>
+
+          <section className={styles.invSection}>
             <motion.div initial={{opacity: 0, y: 30}} whileInView={{opacity: 1, y: 0}} viewport={{once: true}}>
               <span className={styles.sectionLabel}>Sacred Muhurat</span>
               <h2 className={styles.sectionTitle}>Countdown To The Big Day</h2>

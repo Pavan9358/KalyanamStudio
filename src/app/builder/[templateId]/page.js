@@ -39,7 +39,7 @@ const DEFAULT_FORM = {
 };
 
 // Lightweight frontend base64 image compressor to solve Server Payload latencies
-const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
+const compressImage = (file, maxWidth = 800, quality = 0.6) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -62,7 +62,7 @@ const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Compress cleanly into JPEG (reduces 5MB PNGs to ~150KB)
+        // Compress cleanly into JPEG (reduces large PNGs to ~80KB to bypass Serverless 4MB limits)
         const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
         resolve(compressedBase64);
       };

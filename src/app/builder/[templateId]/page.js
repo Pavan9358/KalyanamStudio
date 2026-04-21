@@ -35,6 +35,7 @@ const DEFAULT_FORM = {
   story_video_url: '',
   live_stream_url: '',
   music_url: '',
+  wedding_card_link: '',
 };
 
 // Lightweight frontend base64 image compressor to solve Server Payload latencies
@@ -713,6 +714,16 @@ export default function BuilderPage({ params }) {
                       value={form.rsvp_contact}
                       onChange={e => setForm(f => ({ ...f, rsvp_contact: e.target.value }))}
                     />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Wedding Card Link (PDF / Drive / Image)</label>
+                    <input
+                      className="form-input"
+                      placeholder="e.g. https://drive.google.com/..."
+                      value={form.wedding_card_link || ''}
+                      onChange={e => setForm(f => ({ ...f, wedding_card_link: e.target.value }))}
+                    />
+                    <p className={styles.inputHint} style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '4px' }}>Add a link so guests can view or download your formal wedding card.</p>
                   </div>
                 </motion.div>
               )}

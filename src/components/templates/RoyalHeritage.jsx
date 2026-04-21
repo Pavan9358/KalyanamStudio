@@ -662,6 +662,14 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
               <span className={styles.sectionLabel}>Honor Us With Your Presence</span>
               <h2 className={styles.sectionTitle}>RSVP Now</h2>
               <RSVPForm invitationId={slug} />
+              
+              {data.wedding_card_link && (
+                <div style={{ marginTop: '3rem' }}>
+                  <a href={data.wedding_card_link} target="_blank" rel="noopener noreferrer" className={styles.openBtn} style={{ display: 'inline-flex', padding: '12px 32px', fontSize: '0.9rem', textDecoration: 'none' }}>
+                    VIEW WEDDING CARD ✦
+                  </a>
+                </div>
+              )}
             </motion.div>
           </section>
 

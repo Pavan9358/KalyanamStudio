@@ -844,4 +844,30 @@
   .rsvpWaxBtn {
     align-self: center;
   }
+  /* Save The Date Responsive Fixes */
+  .stdCard {
+    padding: 3rem 1.5rem;
+  }
+  .stdTitle {
+    font-size: 3.2rem;
+    margin-bottom: 1.5rem;
+  }
+  .stdDateBox {
+    gap: 1rem;
+  }
+  .stdMonth, .stdYear {
+    font-size: 1.2rem;
+  }
+  .stdDay {
+    font-size: 3.2rem;
+  }
+  .stdDivider {
+    height: 40px;
+  }
+  .stdLocation {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    word-break: break-word;
+    padding: 0 10px;
+  }
 }

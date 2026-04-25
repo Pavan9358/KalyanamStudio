@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { 
@@ -250,6 +250,20 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
     }
     setPlaying(!playing);
   };
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!audioRef.current) return;
+      if (document.hidden) {
+        audioRef.current.pause();
+      } else if (playing) {
+        audioRef.current.play().catch(() => {});
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [playing]);
 
   return (
     <div className={`${styles.page} ${styles[theme]}`}>

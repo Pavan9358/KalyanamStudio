@@ -241,10 +241,10 @@ export default function BuilderPage({ params }) {
     setSaving(true);
 
     // Auto-rescue mission: Squash any massive cached Base64 images recursively
-    const compressBase64 = (base64Str, maxDim = 600, quality = 0.5) => {
+    const compressBase64 = (base64Str, maxDim, quality, force) => {
       return new Promise((resolve) => {
         if (!base64Str || typeof base64Str !== 'string' || !base64Str.startsWith('data:image')) return resolve(base64Str);
-        if (base64Str.length < 300000) return resolve(base64Str); // Ignore already small payloads (<300KB)
+        if (!force && base64Str.length < 150000) return resolve(base64Str); // Ignore tiny payloads (<150KB) unless forced
         const img = new Image();
         img.src = base64Str;
         img.onload = () => {
@@ -265,31 +265,53 @@ export default function BuilderPage({ params }) {
       });
     };
 
+    let payloadString = '';
+    let payloadMB = 0;
     let safeForm = { ...form };
-    safeForm.groom_photo = await compressBase64(safeForm.groom_photo);
-    safeForm.bride_photo = await compressBase64(safeForm.bride_photo);
-    safeForm.couple_photo = await compressBase64(safeForm.couple_photo);
-    safeForm.groom_family_photo = await compressBase64(safeForm.groom_family_photo);
-    safeForm.bride_family_photo = await compressBase64(safeForm.bride_family_photo);
-    if (safeForm.gallery && safeForm.gallery.length > 0) {
-      safeForm.gallery = await Promise.all(safeForm.gallery.map(img => compressBase64(img)));
+    
+    // Adaptive compression engine to bypass Vercel's strict 4.5MB limit automatically
+    let currentDim = 800;
+    let currentQuality = 0.6;
+    let forceCompress = false;
+
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      safeForm = { ...form }; // Reset to original full-res form state before each pass
+      
+      safeForm.groom_photo = await compressBase64(safeForm.groom_photo, currentDim, currentQuality, forceCompress);
+      safeForm.bride_photo = await compressBase64(safeForm.bride_photo, currentDim, currentQuality, forceCompress);
+      safeForm.couple_photo = await compressBase64(safeForm.couple_photo, currentDim, currentQuality, forceCompress);
+      safeForm.groom_family_photo = await compressBase64(safeForm.groom_family_photo, currentDim, currentQuality, forceCompress);
+      safeForm.bride_family_photo = await compressBase64(safeForm.bride_family_photo, currentDim, currentQuality, forceCompress);
+      
+      if (safeForm.gallery && safeForm.gallery.length > 0) {
+        safeForm.gallery = await Promise.all(safeForm.gallery.map(img => compressBase64(img, currentDim, currentQuality, forceCompress)));
+      }
+
+      const token = localStorage.getItem('ks_token');
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+
+      payloadString = JSON.stringify({
+        template_id: templateId,
+        data_json: { ...safeForm, template_id: templateId },
+        status: status
+      });
+
+      payloadMB = payloadString.length / 1024 / 1024;
+      console.log(`Compression Attempt ${attempt} - Payload Size: ${payloadMB.toFixed(2)} MB`);
+
+      if (payloadMB < 4.3) {
+        break; // Success! Payload fits within Vercel's limit
+      }
+
+      // If still too large, get significantly more aggressive
+      currentDim = Math.round(currentDim * 0.7);
+      currentQuality = currentQuality * 0.6;
+      forceCompress = true; // Force compression even on smaller files
     }
 
-    const token = localStorage.getItem('ks_token');
-    const urlParams = new URLSearchParams(window.location.search);
-    const editId = urlParams.get('edit');
-
-    const payloadString = JSON.stringify({
-      template_id: templateId,
-      data_json: { ...safeForm, template_id: templateId },
-      status: status
-    });
-
-    const payloadMB = payloadString.length / 1024 / 1024;
-    console.log(`Payload Size evaluated: ${payloadMB.toFixed(2)} MB`);
-
-    if (payloadMB > 20) {
-      showToast(`Payload is ${payloadMB.toFixed(1)}MB! The absolute maximum limit is 20MB. You must clear some massive photos currently in your gallery!`, 'error');
+    if (payloadMB > 4.4) {
+      showToast(`Even after max compression, payload is ${payloadMB.toFixed(1)}MB. Vercel allows max 4.5MB. Please remove some photos from the gallery.`, 'error');
       setSaving(false);
       return;
     }

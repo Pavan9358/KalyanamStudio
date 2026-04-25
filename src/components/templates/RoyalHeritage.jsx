@@ -200,6 +200,25 @@ export const getEmbedUrl = (url) => {
   return url;
 };
 
+export const getGoogleCalendarUrl = (data) => {
+  const title = encodeURIComponent(`Wedding Celebration: ${data.groom_name} & ${data.bride_name}`);
+  const details = encodeURIComponent(`We can't wait to celebrate with you!`);
+  const location = encodeURIComponent(data.address || 'Wedding Venue');
+  let dates = '';
+  
+  if (data.events && data.events.length > 0 && data.events[0].date) {
+    try {
+      const d = new Date(data.events[0].date);
+      const start = d.toISOString().split('T')[0].replace(/-/g, '');
+      d.setDate(d.getDate() + 1);
+      const end = d.toISOString().split('T')[0].replace(/-/g, '');
+      dates = `&dates=${start}/${end}`;
+    } catch(e) {}
+  }
+  
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}${dates}`;
+};
+
 // --- ROYAL HERITAGE TEMPLATE COMPONENT ---
 export default function RoyalHeritageTemplate({ data, template, slug }) {
   const [opened, setOpened] = useState(false);
@@ -420,32 +439,6 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
                  );
                })()}
                <p className={styles.stdLocation}>{data.address || "Royal Palace Grounds"}</p>
-               {(() => {
-                 const mainEventDate = data.events?.[0]?.date || '2026-02-22';
-                 const dateObj = new Date(mainEventDate);
-                 const location = encodeURIComponent(data.address || "Royal Palace Grounds");
-                 const title = encodeURIComponent(`Wedding: ${data.groom_name} & ${data.bride_name}`);
-                 const details = encodeURIComponent(`Join us to celebrate the wedding of ${data.groom_name} and ${data.bride_name}!`);
-                 
-                 const startStr = mainEventDate.replace(/-/g, '');
-                 const nextDate = new Date(dateObj);
-                 nextDate.setDate(nextDate.getDate() + 1);
-                 const endStr = nextDate.toISOString().split('T')[0].replace(/-/g, '');
-                 
-                 const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
-                 
-                 return (
-                   <a 
-                     href={calendarUrl}
-                     target="_blank"
-                     rel="noopener noreferrer"
-                     className={styles.openBtn}
-                     style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 24px', fontSize: '0.8rem', marginTop: '2rem', textDecoration: 'none' }}
-                   >
-                     <Calendar size={16} /> ADD TO GOOGLE CALENDAR
-                   </a>
-                 );
-               })()}
             </motion.div>
           </section>
 
@@ -702,7 +695,25 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
             </motion.div>
           </section>
 
-          <footer className={styles.invSection} style={{ paddingBottom: '10rem' }}>
+          <section className={styles.invSection} style={{ borderTop: '1px solid rgba(255,230,183,0.1)' }}>
+            <motion.div initial={{opacity: 0, y: 30}} whileInView={{opacity: 1, y: 0}} viewport={{once: true}}>
+              <span className={styles.sectionLabel}>Save The Date</span>
+              <h2 className={styles.sectionTitle}>Add To Calendar</h2>
+              <p style={{ opacity: 0.8, marginBottom: '2rem', fontSize: '0.95rem' }}>Don't miss our special day. Add it to your calendar!</p>
+              <a 
+                href={getGoogleCalendarUrl(data)} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={styles.openBtn} 
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '15px 35px', textDecoration: 'none' }}
+              >
+                <Calendar size={20} />
+                ADD TO GOOGLE CALENDAR
+              </a>
+            </motion.div>
+          </section>
+
+          <footer className={styles.invSection} style={{ paddingBottom: '10rem', borderTop: '1px solid rgba(255,230,183,0.1)' }}>
              <p style={{fontFamily: 'var(--font-cursive)', fontSize: '2rem', color: 'var(--gold)'}}>With Love,</p>
              <p style={{fontSize: '0.8rem', opacity: 0.5, letterSpacing: '2px'}}>KalyanamStudio Signature Series</p>
           </footer>

@@ -420,6 +420,32 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
                  );
                })()}
                <p className={styles.stdLocation}>{data.address || "Royal Palace Grounds"}</p>
+               {(() => {
+                 const mainEventDate = data.events?.[0]?.date || '2026-02-22';
+                 const dateObj = new Date(mainEventDate);
+                 const location = encodeURIComponent(data.address || "Royal Palace Grounds");
+                 const title = encodeURIComponent(`Wedding: ${data.groom_name} & ${data.bride_name}`);
+                 const details = encodeURIComponent(`Join us to celebrate the wedding of ${data.groom_name} and ${data.bride_name}!`);
+                 
+                 const startStr = mainEventDate.replace(/-/g, '');
+                 const nextDate = new Date(dateObj);
+                 nextDate.setDate(nextDate.getDate() + 1);
+                 const endStr = nextDate.toISOString().split('T')[0].replace(/-/g, '');
+                 
+                 const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
+                 
+                 return (
+                   <a 
+                     href={calendarUrl}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className={styles.openBtn}
+                     style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 24px', fontSize: '0.8rem', marginTop: '2rem', textDecoration: 'none' }}
+                   >
+                     <Calendar size={16} /> ADD TO GOOGLE CALENDAR
+                   </a>
+                 );
+               })()}
             </motion.div>
           </section>
 

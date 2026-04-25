@@ -488,36 +488,38 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
               <span className={styles.sectionLabel}>Our Roots</span>
               <h2 className={styles.sectionTitle}>Meet The Families</h2>
               
-              <div className={styles.coupleCardsGrid}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5rem', marginTop: '3rem', alignItems: 'center' }}>
                 {data.groom_family_photo && (
                   <motion.div 
                     className={styles.coupleCard}
-                    initial={{ opacity: 0, x: -60 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    style={{ width: '100%', maxWidth: '800px', padding: 0 }}
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
                   >
-                    <div className={styles.coupleCardImgWrapper} style={{ width: '100%', height: '450px', borderRadius: '16px', overflow: 'hidden' }}>
-                      <img src={data.groom_family_photo} alt="Groom Family" className={styles.coupleCardImg} style={{ objectFit: 'cover', objectPosition: 'center 15%', width: '100%', height: '100%' }} />
+                    <div style={{ width: '100%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255, 230, 183, 0.2)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)', marginBottom: '2rem', background: 'rgba(27,13,40,0.4)' }}>
+                      <img src={data.groom_family_photo} alt="Groom Family" style={{ width: '100%', height: 'auto', maxHeight: '700px', objectFit: 'contain', display: 'block' }} />
                     </div>
-                    <span className={styles.coupleCardRole}>Groom&apos;s Family</span>
-                    <h3 className={styles.coupleCardName} style={{ fontSize: '1.8rem' }}>Roots of {data.groom_name}</h3>
+                    <span className={styles.coupleCardRole} style={{ fontSize: '0.85rem' }}>Groom&apos;s Family</span>
+                    <h3 className={styles.coupleCardName} style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Roots of {data.groom_name}</h3>
                   </motion.div>
                 )}
 
                 {data.bride_family_photo && (
                   <motion.div 
                     className={styles.coupleCard}
-                    initial={{ opacity: 0, x: 60 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    style={{ width: '100%', maxWidth: '800px', padding: 0 }}
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.8, type: "spring", bounce: 0.4, delay: 0.2 }}
                   >
-                    <div className={styles.coupleCardImgWrapper} style={{ width: '100%', height: '450px', borderRadius: '16px', overflow: 'hidden' }}>
-                      <img src={data.bride_family_photo} alt="Bride Family" className={styles.coupleCardImg} style={{ objectFit: 'cover', objectPosition: 'center 15%', width: '100%', height: '100%' }} />
+                    <div style={{ width: '100%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255, 230, 183, 0.2)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)', marginBottom: '2rem', background: 'rgba(27,13,40,0.4)' }}>
+                      <img src={data.bride_family_photo} alt="Bride Family" style={{ width: '100%', height: 'auto', maxHeight: '700px', objectFit: 'contain', display: 'block' }} />
                     </div>
-                    <span className={styles.coupleCardRole}>Bride&apos;s Family</span>
-                    <h3 className={styles.coupleCardName} style={{ fontSize: '1.8rem' }}>Roots of {data.bride_name}</h3>
+                    <span className={styles.coupleCardRole} style={{ fontSize: '0.85rem' }}>Bride&apos;s Family</span>
+                    <h3 className={styles.coupleCardName} style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Roots of {data.bride_name}</h3>
                   </motion.div>
                 )}
               </div>

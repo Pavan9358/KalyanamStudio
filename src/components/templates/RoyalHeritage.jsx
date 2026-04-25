@@ -291,8 +291,9 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
                 <motion.div 
                   className={styles.entranceAmpersand}
                   variants={{ hidden: { opacity: 0, scale: 0 }, show: { opacity: 1, scale: 1 } }}
+                  style={{ fontSize: '1.8rem', marginTop: '0.5rem', marginBottom: '0.5rem' }}
                 >
-                  &
+                  Weds
                 </motion.div>
 
                 <motion.h1 
@@ -369,7 +370,7 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
               variants={{ hidden: { opacity: 0, y: 30, scale: 0.95 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 1.2, ease: 'easeOut' } } }}
             >
               {data.groom_name}
-              <span className={styles.heroAmpersand}>&</span>
+              <span className={styles.heroAmpersand} style={{ fontSize: '0.6em' }}>Weds</span>
               {data.bride_name}
             </motion.h1>
             

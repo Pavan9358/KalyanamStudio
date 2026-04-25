@@ -497,8 +497,8 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
                   >
-                    <div className={styles.coupleCardImgWrapper} style={{ width: '100%', height: 'auto', aspectRatio: '4/3' }}>
-                      <img src={data.groom_family_photo} alt="Groom Family" className={styles.coupleCardImg} style={{ objectFit: 'cover' }} />
+                    <div className={styles.coupleCardImgWrapper} style={{ width: '100%', height: '350px' }}>
+                      <img src={data.groom_family_photo} alt="Groom Family" className={styles.coupleCardImg} style={{ objectFit: 'contain' }} />
                     </div>
                     <span className={styles.coupleCardRole}>Groom&apos;s Family</span>
                     <h3 className={styles.coupleCardName} style={{ fontSize: '1.8rem' }}>Roots of {data.groom_name}</h3>
@@ -513,8 +513,8 @@ export default function RoyalHeritageTemplate({ data, template, slug }) {
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.8, type: "spring", bounce: 0.4, delay: 0.2 }}
                   >
-                    <div className={styles.coupleCardImgWrapper} style={{ width: '100%', height: 'auto', aspectRatio: '4/3' }}>
-                      <img src={data.bride_family_photo} alt="Bride Family" className={styles.coupleCardImg} style={{ objectFit: 'cover' }} />
+                    <div className={styles.coupleCardImgWrapper} style={{ width: '100%', height: '350px' }}>
+                      <img src={data.bride_family_photo} alt="Bride Family" className={styles.coupleCardImg} style={{ objectFit: 'contain' }} />
                     </div>
                     <span className={styles.coupleCardRole}>Bride&apos;s Family</span>
                     <h3 className={styles.coupleCardName} style={{ fontSize: '1.8rem' }}>Roots of {data.bride_name}</h3>

@@ -91,22 +91,13 @@ export default function PublicInvitePage({ params }) {
       <AnimatePresence>
         {loading && (
           <motion.div 
-            className={styles.loadingScreen}
-            exit={{ opacity: 0, filter: 'blur(10px)' }}
-            transition={{ duration: 0.8 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             key="loader"
-            style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0F0F1A' }}
+            style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--cream)', color: 'var(--maroon)' }}
           >
-            <div className={styles.loaderSpinnerWrapper}>
-              <div className={styles.loaderRing}></div>
-              <div className={styles.loaderRingInner}></div>
-              {/* Fallback general loader if template isn't determined yet */}
-              <img src="/ganesha_transparent.png?v=2" className={styles.loaderGanesha} alt="Loading..." />
-            </div>
-            <h2 className={styles.loaderText}>Preparing Your Invitation</h2>
-            <div className={styles.loaderBarWrapper}>
-              <div className={styles.loaderPulseBar}></div>
-            </div>
+            <div className="spinner" style={{ width: '45px', height: '45px', border: '3px solid rgba(128,0,0,0.1)', borderTop: '3px solid var(--maroon)', margin: '0 0 1rem 0' }}></div>
+            <div style={{ fontFamily: 'var(--font-poppins)', fontSize: '0.8rem', letterSpacing: '3px', textTransform: 'uppercase', opacity: 0.7 }}>Loading</div>
           </motion.div>
         )}
       </AnimatePresence>

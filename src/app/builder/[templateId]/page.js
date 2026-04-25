@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { TEMPLATES } from '@/lib/templates';
 import { saveDraft } from '@/lib/localdb';
+import { supabase } from '@/lib/supabase';
 import styles from './page.module.css';
 import {
   Plus, Trash2, Save, Eye, Share2,
@@ -38,43 +39,26 @@ const DEFAULT_FORM = {
   wedding_card_link: '',
 };
 
-// Ultra-lightweight frontend base64 image compressor to solve strict 1.5MB Server Payload latencies
-const compressImage = (file, maxDim = 500, quality = 0.4) => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+// Upload direct to Supabase Storage, preserving high quality
+const uploadToSupabase = async (file, folder = 'media') => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+  const filePath = `${folder}/${fileName}`;
 
-        if (width > height) {
-          if (width > maxDim) {
-            height = Math.round(height * (maxDim / width));
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width = Math.round(width * (maxDim / height));
-            height = maxDim;
-          }
-        }
+  const { data, error } = await supabase.storage
+    .from('kalyanam-media')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
 
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+  if (error) throw error;
+  
+  const { data: { publicUrl } } = supabase.storage
+    .from('kalyanam-media')
+    .getPublicUrl(filePath);
 
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress cleanly into lightweight JPEG (~20KB-40KB)
-        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-        resolve(compressedBase64);
-      };
-    };
-  });
+  return publicUrl;
 };
 
 function EventSection({ events, onChange }) {
@@ -240,11 +224,12 @@ export default function BuilderPage({ params }) {
   const saveInvitation = async (status = 'draft') => {
     setSaving(true);
 
-    // Auto-rescue mission: Squash any massive cached Base64 images recursively
-    const compressBase64 = (base64Str, maxDim, quality, force) => {
+    // No aggressive compression needed anymore; Supabase URLs are tiny!
+    // However, we apply lightweight protection just in case old Base64 strings are present in drafts.
+    const compressBase64 = (base64Str, maxDim = 800, quality = 0.7) => {
       return new Promise((resolve) => {
         if (!base64Str || typeof base64Str !== 'string' || !base64Str.startsWith('data:image')) return resolve(base64Str);
-        if (!force && base64Str.length < 150000) return resolve(base64Str); // Ignore tiny payloads (<150KB) unless forced
+        if (base64Str.length < 250000) return resolve(base64Str); 
         const img = new Image();
         img.src = base64Str;
         img.onload = () => {
@@ -265,53 +250,32 @@ export default function BuilderPage({ params }) {
       });
     };
 
-    let payloadString = '';
-    let payloadMB = 0;
     let safeForm = { ...form };
+    safeForm.groom_photo = await compressBase64(safeForm.groom_photo);
+    safeForm.bride_photo = await compressBase64(safeForm.bride_photo);
+    safeForm.couple_photo = await compressBase64(safeForm.couple_photo);
+    safeForm.groom_family_photo = await compressBase64(safeForm.groom_family_photo);
+    safeForm.bride_family_photo = await compressBase64(safeForm.bride_family_photo);
     
-    // Adaptive compression engine to bypass Vercel's strict 4.5MB limit automatically
-    let currentDim = 800;
-    let currentQuality = 0.6;
-    let forceCompress = false;
-
-    for (let attempt = 1; attempt <= 4; attempt++) {
-      safeForm = { ...form }; // Reset to original full-res form state before each pass
-      
-      safeForm.groom_photo = await compressBase64(safeForm.groom_photo, currentDim, currentQuality, forceCompress);
-      safeForm.bride_photo = await compressBase64(safeForm.bride_photo, currentDim, currentQuality, forceCompress);
-      safeForm.couple_photo = await compressBase64(safeForm.couple_photo, currentDim, currentQuality, forceCompress);
-      safeForm.groom_family_photo = await compressBase64(safeForm.groom_family_photo, currentDim, currentQuality, forceCompress);
-      safeForm.bride_family_photo = await compressBase64(safeForm.bride_family_photo, currentDim, currentQuality, forceCompress);
-      
-      if (safeForm.gallery && safeForm.gallery.length > 0) {
-        safeForm.gallery = await Promise.all(safeForm.gallery.map(img => compressBase64(img, currentDim, currentQuality, forceCompress)));
-      }
-
-      const token = localStorage.getItem('ks_token');
-      const urlParams = new URLSearchParams(window.location.search);
-      const editId = urlParams.get('edit');
-
-      payloadString = JSON.stringify({
-        template_id: templateId,
-        data_json: { ...safeForm, template_id: templateId },
-        status: status
-      });
-
-      payloadMB = payloadString.length / 1024 / 1024;
-      console.log(`Compression Attempt ${attempt} - Payload Size: ${payloadMB.toFixed(2)} MB`);
-
-      if (payloadMB < 4.3) {
-        break; // Success! Payload fits within Vercel's limit
-      }
-
-      // If still too large, get significantly more aggressive
-      currentDim = Math.round(currentDim * 0.7);
-      currentQuality = currentQuality * 0.6;
-      forceCompress = true; // Force compression even on smaller files
+    if (safeForm.gallery && safeForm.gallery.length > 0) {
+      safeForm.gallery = await Promise.all(safeForm.gallery.map(img => compressBase64(img)));
     }
 
+    const token = localStorage.getItem('ks_token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+
+    const payloadString = JSON.stringify({
+      template_id: templateId,
+      data_json: { ...safeForm, template_id: templateId },
+      status: status
+    });
+
+    const payloadMB = payloadString.length / 1024 / 1024;
+    console.log(`Final Payload Size: ${payloadMB.toFixed(2)} MB`);
+
     if (payloadMB > 4.4) {
-      showToast(`Even after max compression, payload is ${payloadMB.toFixed(1)}MB. Vercel allows max 4.5MB. Please remove some photos from the gallery.`, 'error');
+      showToast(`Old draft contains too many huge Base64 images. Please remove your photos and upload them again to use our new high-quality system!`, 'error');
       setSaving(false);
       return;
     }
@@ -356,22 +320,43 @@ export default function BuilderPage({ params }) {
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const compressed = await compressImage(file);
-    setForm(f => ({ ...f, couple_photo: compressed }));
+    showToast('Uploading high-quality hero photo...', 'info');
+    try {
+      const url = await uploadToSupabase(file, 'couple');
+      setForm(f => ({ ...f, couple_photo: url }));
+      showToast('Hero photo ready!', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Upload failed: ' + err.message, 'error');
+    }
   };
 
   const handleIndividualPhotoUpload = async (e, field) => {
     const file = e.target.files[0];
     if (!file) return;
-    const compressed = await compressImage(file);
-    setForm(f => ({ ...f, [field]: compressed }));
+    showToast(`Uploading high-quality portrait...`, 'info');
+    try {
+      const url = await uploadToSupabase(file, 'portraits');
+      setForm(f => ({ ...f, [field]: url }));
+      showToast('Portrait ready!', 'success');
+    } catch (err) {
+      showToast('Upload failed: ' + err.message, 'error');
+    }
   };
 
   const handleGalleryUpload = async (e) => {
     const files = Array.from(e.target.files);
-    for (const file of files) {
-      const compressed = await compressImage(file);
-      setForm(f => ({ ...f, gallery: [...(f.gallery || []), compressed] }));
+    showToast(`Uploading ${files.length} high-quality gallery photos...`, 'info');
+    try {
+      const urls = [];
+      for (const file of files) {
+        const url = await uploadToSupabase(file, 'gallery');
+        urls.push(url);
+      }
+      setForm(f => ({ ...f, gallery: [...(f.gallery || []), ...urls] }));
+      showToast('Gallery updated!', 'success');
+    } catch (err) {
+      showToast('Gallery upload failed: ' + err.message, 'error');
     }
   };
 
@@ -382,14 +367,17 @@ export default function BuilderPage({ params }) {
     }));
   };
 
-  const handleMusicUpload = (e) => {
+  const handleMusicUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm(f => ({ ...f, music_url: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    showToast('Uploading custom music...', 'info');
+    try {
+      const url = await uploadToSupabase(file, 'music');
+      setForm(f => ({ ...f, music_url: url }));
+      showToast('Music ready!', 'success');
+    } catch (err) {
+      showToast('Music upload failed: ' + err.message, 'error');
+    }
   };
 
   if (!template) {

@@ -288,8 +288,8 @@ export default function BuilderPage({ params }) {
     const payloadMB = payloadString.length / 1024 / 1024;
     console.log(`Payload Size evaluated: ${payloadMB.toFixed(2)} MB`);
 
-    if (payloadMB > 4.3) {
-      showToast(`Payload is ${payloadMB.toFixed(1)}MB! Vercel's absolute maximum limit is 4.5MB. You must clear the massive photos currently in your gallery so the New compression engine can process small ones!`, 'error');
+    if (payloadMB > 20) {
+      showToast(`Payload is ${payloadMB.toFixed(1)}MB! The absolute maximum limit is 20MB. You must clear some massive photos currently in your gallery!`, 'error');
       setSaving(false);
       return;
     }
